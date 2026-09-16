@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '0.3';
+const VERSION = '0.4';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -52,6 +52,7 @@ let psychoJSStarted = false;
 let shamePool = [];
 let guiltPool = [];
 let audioUnlocker = null;
+let taskStatus = null;
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, (char) => ({
@@ -74,6 +75,27 @@ function nowSeconds() {
 
 function render(content, extraClass = '') {
   app.innerHTML = `<section class="panel ${extraClass}">${content}</section>`;
+}
+
+function taskHeaderHtml() {
+  if (!taskStatus) return '';
+  const {
+    personalFund,
+    totalPublicDecisions,
+    publicDecisionsReviewed,
+    approvedPublicDecisions,
+  } = taskStatus;
+  const recordDisplay = publicDecisionsReviewed === 0
+    ? '<p class="record-empty">No public decisions reviewed yet</p>'
+    : `<div class="record-meter" role="progressbar" aria-label="Community record: ${approvedPublicDecisions} approved public decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`;
+  return `<header class="task-header">
+    <section class="task-status-card"><span class="task-status-label">Personal fund</span><strong>£${personalFund.toFixed(2)}</strong></section>
+    <section class="task-status-card community-record"><span class="task-status-label">Community record</span>${recordDisplay}</section>
+  </header>`;
+}
+
+function renderTask(content, extraClass = '') {
+  render(`${taskHeaderHtml()}${content}`, extraClass);
 }
 
 function stopNarration() {
@@ -267,7 +289,7 @@ function targetCard(trial) {
 
 async function chooseAllocation(trial, balance) {
   const choices = trial.split_options.map((option) => `<button class="choice allocation" data-value="${option.id}">Keep £${option.self_amount}\nGive £${option.target_amount}</button>`).join('');
-  render(`<p class="fund">Your personal fund: £${balance.toFixed(2)}</p><h2>Choose how much to keep and how much to give</h2>
+  renderTask(`<h2>Choose how much to keep and how much to give</h2>
     <div class="trial-grid"><div class="choices">${choices}</div>${targetCard(trial)}</div>`);
   const onset = nowSeconds();
   const selectedId = Number(await waitForSelection('.allocation'));
@@ -278,7 +300,7 @@ async function choosePrediction(trial) {
   const question = trial.type === 'group'
     ? `Do the ${trial.name} representatives think your decision was socially appropriate?`
     : `Does ${trial.name} think your decision treated them fairly?`;
-  render(`<h2>${question}</h2><div class="prediction-target">${targetCard(trial)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">YES</button><button class="primary prediction" data-value="disapprove">NO</button></div>`);
+  renderTask(`<h2>${question}</h2><div class="prediction-target">${targetCard(trial)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">YES</button><button class="primary prediction" data-value="disapprove">NO</button></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
   return { prediction, responseTime: nowSeconds() - onset };
@@ -286,14 +308,14 @@ async function choosePrediction(trial) {
 
 async function chooseConfidence() {
   const options = [1, 2, 3, 4, 5].map((value) => `<button class="rating-option confidence" data-value="${value}">${value}</button>`).join('');
-  render(`<h2>How confident are you in your prediction?</h2><p class="muted">1 = not at all confident &nbsp;&nbsp;&nbsp; 5 = very confident</p><div class="scale">${options}</div>`);
+  renderTask(`<h2>How confident are you in your prediction?</h2><p class="muted">1 = not at all confident &nbsp;&nbsp;&nbsp; 5 = very confident</p><div class="scale">${options}</div>`);
   const onset = nowSeconds();
   const confidence = Number(await waitForSelection('.confidence'));
   return { confidence, responseTime: nowSeconds() - onset };
 }
 
 async function fetchingEvaluation() {
-  render('<p class="fetching">The evaluation is being considered…</p>');
+  renderTask('<p class="fetching">The evaluation is being considered…</p>');
   await new Promise((resolve) => window.setTimeout(resolve, 1500));
 }
 
@@ -303,7 +325,7 @@ async function showFeedback(trial, feedback) {
     ? (feedback.approved ? `The ${trial.name} representatives decided that your decision was in line with their community norms.` : `The ${trial.name} representatives decided your decision violated their community norms.`)
     : (feedback.approved ? `${trial.name} decided they were treated fairly.` : `${trial.name} decided that your decision treated them unfairly.`);
   const visibility = isGroup ? 'This decision will appear on your committee record.' : `This decision will only be visible to yourself and ${trial.name}.`;
-  render(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div><p>${visibility}</p><div class="actions"><button id="continue" class="primary">Continue</button></div>`);
+  renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div><p>${visibility}</p><div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
 }
 
@@ -329,7 +351,7 @@ function emotionProbeSchedule(nTrials) {
 async function emotionProbe() {
   const itemNumbers = shuffle([nextAlternateItem('shame'), nextAlternateItem('guilt')]);
   const rows = itemNumbers.map((item) => `<div class="likert-row"><p>${escapeHtml(SSGS_ITEMS[item])}</p><div class="scale">${[1, 2, 3, 4, 5].map((rating) => `<button class="rating-option emotion-${item}" data-value="${rating}">${rating}</button>`).join('')}</div></div>`).join('');
-  render(`<h2>Right now, how much do you feel each of the following?</h2><p class="muted">1 = Not at all &nbsp;&nbsp; 3 = Somewhat &nbsp;&nbsp; 5 = Very strongly</p>${rows}<div class="actions"><button id="continue" class="primary" disabled>Continue</button></div>`);
+  renderTask(`<h2>Right now, how much do you feel each of the following?</h2><p class="muted">1 = Not at all &nbsp;&nbsp; 3 = Somewhat &nbsp;&nbsp; 5 = Very strongly</p>${rows}<div class="actions"><button id="continue" class="primary" disabled>Continue</button></div>`);
   const onset = nowSeconds();
   const responses = {};
   itemNumbers.forEach((item) => {
@@ -348,7 +370,7 @@ async function emotionProbe() {
 }
 
 async function chooseRepair(trial) {
-  render(`<h2>What would you like to do?</h2><p>Giving money costs £${REPAIR_AMOUNT} from your personal fund.</p><div class="vertical-choices"><button class="primary repair" data-value="target">Give £${REPAIR_AMOUNT} to ${escapeHtml(trial.name)}</button><button class="primary repair" data-value="community">Give £${REPAIR_AMOUNT} to future community projects</button><button class="primary repair" data-value="none">Do nothing</button></div>`);
+  renderTask(`<h2>What would you like to do?</h2><p>Giving money costs £${REPAIR_AMOUNT} from your personal fund.</p><div class="vertical-choices"><button class="primary repair" data-value="target">Give £${REPAIR_AMOUNT} to ${escapeHtml(trial.name)}</button><button class="primary repair" data-value="community">Give £${REPAIR_AMOUNT} to future community projects</button><button class="primary repair" data-value="none">Do nothing</button></div>`);
   const onset = nowSeconds();
   const repairChoice = await waitForSelection('.repair');
   return { repairChoice, responseTime: nowSeconds() - onset };
@@ -359,12 +381,23 @@ async function runTrials() {
   const hidden = initialiseHiddenTargets();
   const probeTrials = emotionProbeSchedule(trials.length);
   let balance = STARTING_BALANCE;
+  taskStatus = {
+    personalFund: balance,
+    totalPublicDecisions: trials.filter((trial) => trial.type === 'group').length,
+    publicDecisionsReviewed: 0,
+    approvedPublicDecisions: 0,
+  };
   for (const trial of trials) {
     const allocation = await chooseAllocation(trial, balance);
     const prediction = await choosePrediction(trial);
     const confidence = await chooseConfidence();
     const feedback = feedbackFor(trial, allocation.choice, hidden);
     balance += allocation.choice.self_amount;
+    taskStatus.personalFund = balance;
+    if (trial.type === 'group') {
+      taskStatus.publicDecisionsReviewed += 1;
+      if (feedback.approved) taskStatus.approvedPublicDecisions += 1;
+    }
     await fetchingEvaluation();
     await showFeedback(trial, feedback);
     let emotion = null;
@@ -372,7 +405,10 @@ async function runTrials() {
     let repair = { repairChoice: '', responseTime: '' };
     if (!feedback.approved) {
       repair = await chooseRepair(trial);
-      if (repair.repairChoice !== 'none') balance -= REPAIR_AMOUNT;
+      if (repair.repairChoice !== 'none') {
+        balance -= REPAIR_AMOUNT;
+        taskStatus.personalFund = balance;
+      }
     }
     writeEvent('trial', {
       trial_num: trial.trial_num,
@@ -403,6 +439,7 @@ async function runTrials() {
       SSGS_shame: emotion ? emotion.shame : '', SSGS_guilt: emotion ? emotion.guilt : '',
     });
   }
+  taskStatus = null;
 }
 
 async function pilotChecks() {
