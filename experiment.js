@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '1.1';
+const VERSION = '1.2';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -380,7 +380,7 @@ async function emotionProbe() {
 async function chooseRepair(trial) {
   const targetRepairLabel = trial.type === 'individual'
     ? `Add £${REPAIR_AMOUNT} to ${escapeHtml(trial.name)}’s salary`
-    : `Add £${REPAIR_AMOUNT} to ${escapeHtml(trial.name)}’s fund`;
+    : `Add £${REPAIR_AMOUNT} to the ${escapeHtml(trial.name)}`;
   renderTask(`<h2>What would you like to do?</h2><p>Giving money costs £${REPAIR_AMOUNT} from your salary.</p><div class="vertical-choices"><button class="primary repair" data-value="target">${targetRepairLabel}</button><button class="primary repair" data-value="community">Give £${REPAIR_AMOUNT} to future community projects</button><button class="primary repair" data-value="none">Do nothing</button></div>`);
   const onset = nowSeconds();
   const repairChoice = await waitForSelection('.repair');
