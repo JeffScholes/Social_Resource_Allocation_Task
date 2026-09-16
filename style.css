@@ -80,7 +80,15 @@ label { display: block; text-align: left; font-weight: 700; }
 .record-marker { position: absolute; top: 50%; width: 22px; height: 22px; transform: translate(-50%, -50%); border: 3px solid #fff; border-radius: 50%; background: #171717; box-shadow: 0 0 0 1px #000; transition: left .35s ease-out; }
 .trial-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(220px, .8fr); gap: 28px; align-items: center; }
 .choices { display: grid; gap: 12px; }
-.choice { min-height: 70px; font-size: 1.05rem; white-space: pre-line; }
+.choice { min-height: 70px; font-size: 1.05rem; }
+.allocation { min-width: 0; padding: 15px 18px; text-align: left; }
+.allocation-labels, .allocation-amounts { display: flex; justify-content: space-between; align-items: baseline; }
+.allocation-labels { color: #d9d9d9; font-size: .78rem; letter-spacing: .08em; }
+.allocation-amounts { margin-top: 4px; font-size: 1.2rem; }
+.allocation-amounts span:last-child { color: #c5c5c5; }
+.allocation-bar { display: flex; width: 100%; height: 16px; margin-top: 11px; overflow: hidden; border: 1px solid #e2e2e2; border-radius: 3px; }
+.allocation-keep { background: #e6e6e6; }
+.allocation-give { background: #5b5b5b; }
 .target-card p { font-size: 1rem; }
 .target-card img { max-height: 250px; }
 .fetching { font-size: 1.3rem; padding: 70px 0; }

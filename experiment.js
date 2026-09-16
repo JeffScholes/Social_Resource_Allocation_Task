@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '0.4';
+const VERSION = '0.5';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -288,7 +288,15 @@ function targetCard(trial) {
 }
 
 async function chooseAllocation(trial, balance) {
-  const choices = trial.split_options.map((option) => `<button class="choice allocation" data-value="${option.id}">Keep £${option.self_amount}\nGive £${option.target_amount}</button>`).join('');
+  const choices = trial.split_options.map((option) => {
+    const keepPercentage = (option.self_amount / STARTING_BALANCE) * 100;
+    const givePercentage = (option.target_amount / STARTING_BALANCE) * 100;
+    return `<button class="choice allocation" data-value="${option.id}" aria-label="Keep £${option.self_amount}; give £${option.target_amount}">
+      <span class="allocation-labels"><span>KEEP</span><span>GIVE</span></span>
+      <span class="allocation-amounts"><span>£${option.self_amount}</span><span>£${option.target_amount}</span></span>
+      <span class="allocation-bar" aria-hidden="true"><span class="allocation-keep" style="width: ${keepPercentage}%"></span><span class="allocation-give" style="width: ${givePercentage}%"></span></span>
+    </button>`;
+  }).join('');
   renderTask(`<h2>Choose how much to keep and how much to give</h2>
     <div class="trial-grid"><div class="choices">${choices}</div>${targetCard(trial)}</div>`);
   const onset = nowSeconds();
