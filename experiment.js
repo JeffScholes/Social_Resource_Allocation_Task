@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '0.7';
+const VERSION = '0.8';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -297,7 +297,7 @@ async function chooseAllocation(trial, balance) {
       <span class="allocation-bar" aria-hidden="true"><span class="allocation-keep" style="width: ${keepPercentage}%"></span><span class="allocation-give" style="width: ${givePercentage}%"></span></span>
     </button>`;
   }).join('');
-  renderTask(`<h2>Choose your split</h2>
+  renderTask(`<h2>How would you like to divide £1,000?</h2>
     <div class="trial-grid"><div class="choices">${choices}</div>${targetCard(trial)}</div>`);
   const onset = nowSeconds();
   const selectedId = Number(await waitForSelection('.allocation'));
