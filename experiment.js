@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '0.9';
+const VERSION = '1.0';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -89,7 +89,7 @@ function taskHeaderHtml() {
     ? '<p class="record-empty">No public decisions reviewed yet</p>'
     : `<div class="record-meter" role="progressbar" aria-label="Community record: ${approvedPublicDecisions} approved public decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`;
   return `<header class="task-header">
-    <section class="task-status-card"><span class="task-status-label">Personal fund</span><strong>£${personalFund.toFixed(2)}</strong></section>
+    <section class="task-status-card"><span class="task-status-label">Your salary</span><strong>£${personalFund.toFixed(2)}</strong></section>
     <section class="task-status-card community-record"><span class="task-status-label">Community record</span>${recordDisplay}</section>
   </header>`;
 }
