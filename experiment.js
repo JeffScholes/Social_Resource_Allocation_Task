@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '0.6';
+const VERSION = '0.7';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -402,11 +402,11 @@ async function runTrials() {
     const feedback = feedbackFor(trial, allocation.choice, hidden);
     balance += allocation.choice.self_amount;
     taskStatus.personalFund = balance;
+    await fetchingEvaluation();
     if (trial.type === 'group') {
       taskStatus.publicDecisionsReviewed += 1;
       if (feedback.approved) taskStatus.approvedPublicDecisions += 1;
     }
-    await fetchingEvaluation();
     await showFeedback(trial, feedback);
     let emotion = null;
     if (probeTrials.has(trial.trial_num)) emotion = await emotionProbe();
