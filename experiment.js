@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '1.2';
+const VERSION = '1.3';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -288,6 +288,9 @@ function targetCard(trial) {
 }
 
 async function chooseAllocation(trial, balance) {
+  const allocationHeading = trial.type === 'individual'
+    ? `Choose salary increase split for you and ${escapeHtml(trial.name)}`
+    : `Choose the split between your salary and ${escapeHtml(trial.name)}`;
   const choices = trial.split_options.map((option) => {
     const keepPercentage = (option.self_amount / STARTING_BALANCE) * 100;
     const givePercentage = (option.target_amount / STARTING_BALANCE) * 100;
@@ -297,7 +300,7 @@ async function chooseAllocation(trial, balance) {
       <span class="allocation-bar" aria-hidden="true"><span class="allocation-keep" style="width: ${keepPercentage}%"></span><span class="allocation-give" style="width: ${givePercentage}%"></span></span>
     </button>`;
   }).join('');
-  renderTask(`<h2>How would you like to divide £1,000?</h2>
+  renderTask(`<h2>${allocationHeading}</h2>
     <div class="trial-grid"><div class="choices">${choices}</div>${targetCard(trial)}</div>`);
   const onset = nowSeconds();
   const selectedId = Number(await waitForSelection('.allocation'));
