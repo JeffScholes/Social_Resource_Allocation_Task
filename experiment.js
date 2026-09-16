@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '0.8';
+const VERSION = '0.9';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -498,6 +498,7 @@ async function finishExperiment() {
 async function runExperiment() {
   await showInstruction('Community Committee', 'You have been invited to assist a local committee as a temporary fund manager.\n\nYou will make funding decisions for the community.', 'assets/audio/01_community_committee.wav');
   await showInstruction('Who will receive funds?', '• Two community groups — a Youth Fund and a Sports Fund\n• Two individual committee members\n• Yourself\n\nGroups and individuals will evaluate your decisions in different ways.', 'assets/audio/02_recipients.wav');
+  await showInstruction('Who will receive funds?', 'In each round, you will divide £1,000.\n\nMoney you keep is added to your salary.\n\nOn rounds involving an individual committee member, money you give is added to that member’s salary.\n\nOn rounds involving a community group, money you give funds that group’s community projects.');
   await showProfiles('Community Groups', 'Evaluate your decisions based on whether they align with their community standards of fairness.', GROUPS, 'teal', 'assets/audio/03_community_groups.wav');
   await showProfiles('Individual Committee Members', 'Individuals judge your decisions on whether they feel fairly treated. Each belongs to one group, but you will not be told which.', INDIVIDUALS, 'amber', 'assets/audio/04_individual_members.wav');
   await showInstruction('How each trial works', '1. Choose a split\n2. Predict their response\n3. Rate your confidence\n4. See their evaluation\n5. If they disapprove, choose whether to repair\n\nOccasionally you will rate how you feel.', 'assets/audio/05_round_sequence.wav');
