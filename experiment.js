@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '1.4';
+const VERSION = '1.5';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -58,8 +58,12 @@ const INTRO_DIAGRAMS = {
     <div class="salary-row"><span class="diagram-row-label">INDIVIDUAL ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">YOUR SALARY</div><span class="diagram-plus">+</span><div class="diagram-card diagram-individual">MEMBER SALARY</div></div></div>
     <div class="salary-row"><span class="diagram-row-label">GROUP ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">YOUR SALARY</div><span class="diagram-plus">+</span><div class="diagram-card diagram-group">COMMUNITY PROJECT</div></div></div>
   </div>`,
-  trialFlow: `<div class="instruction-diagram flow-diagram" role="img" aria-label="The trial sequence is choose a split, predict the response, rate confidence, see feedback, and repair if needed.">
-    <div class="flow-step"><span>1</span>Choose split</div><b>→</b><div class="flow-step"><span>2</span>Predict response</div><b>→</b><div class="flow-step"><span>3</span>Confidence</div><b>→</b><div class="flow-step"><span>4</span>Feedback</div><b>→</b><div class="flow-step"><span>5</span>Repair if needed</div>
+  evaluations: `<div class="instruction-diagram evaluations-diagram" role="img" aria-label="Groups evaluate decisions against community standards. Individuals evaluate whether they were treated fairly.">
+    <div class="evaluation-path"><div class="diagram-card diagram-group">COMMUNITY GROUPS</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-evaluation">COMMUNITY STANDARDS<span>Was the decision socially appropriate?</span></div></div>
+    <div class="evaluation-path"><div class="diagram-card diagram-individual">INDIVIDUAL MEMBERS</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-evaluation">FAIR TREATMENT<span>Was the individual treated fairly?</span></div></div>
+  </div>`,
+  trialFlow: `<div class="instruction-diagram flow-diagram" role="img" aria-label="The trial sequence is choose a split, predict the response, rate confidence, see feedback, and repair only after a negative evaluation.">
+    <div class="flow-steps"><div class="flow-step"><span>1</span>Choose split</div><b>→</b><div class="flow-step"><span>2</span>Predict response</div><b>→</b><div class="flow-step"><span>3</span>Confidence</div><b>→</b><div class="flow-step"><span>4</span>Feedback</div><b>→</b><div class="flow-step"><span>5</span>Repair only after negative evaluation</div></div><p class="diagram-note">Occasionally you will rate how you feel.</p>
   </div>`,
   visibility: `<div class="instruction-diagram visibility-diagram" role="img" aria-label="Group decisions are public and update the community record. Individual decisions are private.">
     <div class="visibility-path"><div class="diagram-card diagram-group">GROUP DECISION</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-record">COMMUNITY RECORD<div class="mini-record"><span></span></div></div></div>
@@ -68,7 +72,6 @@ const INTRO_DIAGRAMS = {
   bonus: `<div class="instruction-diagram bonus-diagram" role="img" aria-label="Your salary and community record contribute to a potential final payment.">
     <div class="bonus-inputs"><div class="diagram-card diagram-salary">YOUR SALARY</div><div class="diagram-plus">+</div><div class="diagram-card diagram-record">COMMUNITY RECORD</div></div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-payment">POTENTIAL FINAL PAYMENT</div>
   </div>`,
-  demo: `<div class="instruction-diagram demo-diagram" role="img" aria-label="The example round demonstrates choosing, predicting, feedback, and repair."><div class="demo-play">▶</div><div class="demo-flow">Choose <b>→</b> Predict <b>→</b> Feedback <b>→</b> Repair</div></div>`,
   ready: `<div class="instruction-diagram ready-diagram" role="img" aria-label="You are ready to divide £1,000, predict a response, and see feedback."><div class="flow-step">Divide £1,000</div><b>→</b><div class="flow-step">Predict</div><b>→</b><div class="flow-step">See feedback</div></div>`,
 };
 
@@ -213,7 +216,7 @@ function instructionHtml(title, body, audioPath = null, diagram = '') {
     <div class="actions"><button id="replay-audio" class="secondary">Play narration</button></div>
     <p id="audio-status" class="audio-status">Narration starting…</p>` : '';
   const instructionContent = diagram
-    ? `<div class="instruction-layout"><p class="instruction-body">${body}</p>${diagram}</div>`
+    ? `<div class="instruction-layout${body ? '' : ' diagram-only'}">${body ? `<p class="instruction-body">${body}</p>` : ''}${diagram}</div>`
     : `<p class="instruction-body">${body}</p>`;
   return `<h2>${title}</h2>${instructionContent}${audioControls}
     <div class="actions"><button id="continue" class="primary">Continue</button></div>`;
@@ -535,15 +538,16 @@ async function finishExperiment() {
 }
 
 async function runExperiment() {
-  await showInstruction('Community Committee', 'You have been invited to assist a local committee as a temporary fund manager.\n\nYou will make funding decisions for the community.', 'assets/audio/01_community_committee.wav', INTRO_DIAGRAMS.committee);
-  await showInstruction('Who will receive funds?', '• Two community groups — a Youth Fund and a Sports Fund\n• Two individual committee members\n• Yourself\n\nGroups and individuals will evaluate your decisions in different ways.', 'assets/audio/02_recipients.wav', INTRO_DIAGRAMS.recipients);
-  await showInstruction('Who will receive funds?', 'In each round, you will divide £1,000.\n\nMoney you keep is added to your salary.\n\nOn rounds involving an individual committee member, money you give is added to that member’s salary.\n\nOn rounds involving a community group, money you give funds that group’s community projects.', null, INTRO_DIAGRAMS.salary);
+  await showInstruction('Community Committee', '', 'assets/audio/01_community_committee.wav', INTRO_DIAGRAMS.committee);
+  await showInstruction('Who will receive funds?', '', 'assets/audio/02_recipients.wav', INTRO_DIAGRAMS.recipients);
+  await showInstruction('Who will receive funds?', '', null, INTRO_DIAGRAMS.salary);
+  await showInstruction('How evaluations work', '', null, INTRO_DIAGRAMS.evaluations);
   await showProfiles('Community Groups', 'Evaluate your decisions based on whether they align with their community standards of fairness.', GROUPS, 'teal', 'assets/audio/03_community_groups.wav');
   await showProfiles('Individual Committee Members', 'Individuals judge your decisions on whether they feel fairly treated. Each belongs to one group, but you will not be told which.', INDIVIDUALS, 'amber', 'assets/audio/04_individual_members.wav');
-  await showInstruction('How each trial works', 'Each trial follows this sequence. Repair is offered only after a negative evaluation.\n\nOccasionally you will rate how you feel.', 'assets/audio/05_round_sequence.wav', INTRO_DIAGRAMS.trialFlow);
-  await showInstruction('Public vs. private decisions', 'Group decisions: public — added to your committee record\n\nIndividual decisions: private — seen only by you and that individual.', 'assets/audio/06_public_private.wav', INTRO_DIAGRAMS.visibility);
-  await showInstruction('Your bonus', '• Money you keep is added to your salary.\n• Repairing a decision reduces your salary.\n• Your public committee record is used to determine your bonus.\n\nYour final payment depends on your salary and bonus.', 'assets/audio/07_bonus.wav', INTRO_DIAGRAMS.bonus);
-  await showInstruction('Demonstration — before you begin', 'You will now see an example round.\n\nWatch how to make a decision, predict a response, view feedback, and choose whether to repair.', null, INTRO_DIAGRAMS.demo);
+  await showInstruction('How each trial works', '', 'assets/audio/05_round_sequence.wav', INTRO_DIAGRAMS.trialFlow);
+  await showInstruction('Public vs. private decisions', '', 'assets/audio/06_public_private.wav', INTRO_DIAGRAMS.visibility);
+  await showInstruction('Your bonus', '', 'assets/audio/07_bonus.wav', INTRO_DIAGRAMS.bonus);
+  await showInstruction('Demonstration — before you begin', 'You will now see an example round.\n\nWatch how to make a decision, predict a response, view feedback, and choose whether to repair.');
   await showDemo();
   await showInstruction('Ready to begin', 'You will now begin the experiment.\n\nOn each trial, choose how to divide the amount shown between yourself and one group or individual. Then predict their response and rate your confidence.\n\nPlease respond as you genuinely would. There are no right or wrong answers.', null, INTRO_DIAGRAMS.ready);
   await runTrials();
