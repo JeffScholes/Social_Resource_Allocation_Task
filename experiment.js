@@ -8,7 +8,7 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '1.5';
+const VERSION = '1.6';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -48,11 +48,6 @@ const INTRO_DIAGRAMS = {
     <div class="diagram-card diagram-budget">£1,000<span>Decision budget</span></div>
     <div class="diagram-arrow">↓</div>
     <div class="diagram-caption">Decide how it is divided</div>
-  </div>`,
-  recipients: `<div class="instruction-diagram recipients-diagram" role="img" aria-label="Each round, you divide £1,000 between yourself and either a community group or an individual committee member.">
-    <div class="diagram-card diagram-budget">£1,000<span>Decision budget</span></div>
-    <div class="diagram-arrow">↓</div>
-    <div class="recipient-branches"><div class="diagram-card diagram-you">YOU</div><div class="diagram-plus">+</div><div class="recipient-options"><div class="diagram-card diagram-group">COMMUNITY GROUP</div><div class="diagram-or">OR</div><div class="diagram-card diagram-individual">INDIVIDUAL MEMBER</div></div></div>
   </div>`,
   salary: `<div class="instruction-diagram salary-diagram" role="img" aria-label="Individual rounds divide £1,000 between your salary and a member's salary. Group rounds divide £1,000 between your salary and a community project.">
     <div class="salary-row"><span class="diagram-row-label">INDIVIDUAL ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">YOUR SALARY</div><span class="diagram-plus">+</span><div class="diagram-card diagram-individual">MEMBER SALARY</div></div></div>
@@ -240,7 +235,8 @@ async function showProfiles(title, subtitle, targets, theme, audioPath) {
       <h3>${escapeHtml(target.name)}</h3>
       <p>${escapeHtml(target.description)}</p>
     </article>`).join('');
-  render(`<h2>${title}</h2><p class="instruction-body">${subtitle}</p>
+  const subtitleHtml = subtitle ? `<p class="instruction-body">${subtitle}</p>` : '';
+  render(`<h2>${title}</h2>${subtitleHtml}
     <div class="profiles">${cards}</div>
     <div class="actions"><button id="replay-audio" class="secondary">Play narration</button><button id="continue" class="primary">Continue</button></div>
     <p id="audio-status" class="audio-status">Narration starting…</p>`);
@@ -539,11 +535,10 @@ async function finishExperiment() {
 
 async function runExperiment() {
   await showInstruction('Community Committee', '', 'assets/audio/01_community_committee.wav', INTRO_DIAGRAMS.committee);
-  await showInstruction('Who will receive funds?', '', 'assets/audio/02_recipients.wav', INTRO_DIAGRAMS.recipients);
-  await showInstruction('Who will receive funds?', '', null, INTRO_DIAGRAMS.salary);
+  await showInstruction('Who will receive funds?', '', 'assets/audio/02_recipients.wav', INTRO_DIAGRAMS.salary);
   await showInstruction('How evaluations work', '', null, INTRO_DIAGRAMS.evaluations);
-  await showProfiles('Community Groups', 'Evaluate your decisions based on whether they align with their community standards of fairness.', GROUPS, 'teal', 'assets/audio/03_community_groups.wav');
-  await showProfiles('Individual Committee Members', 'Individuals judge your decisions on whether they feel fairly treated. Each belongs to one group, but you will not be told which.', INDIVIDUALS, 'amber', 'assets/audio/04_individual_members.wav');
+  await showProfiles('Community Groups', '', GROUPS, 'teal', 'assets/audio/03_community_groups.wav');
+  await showProfiles('Individual Committee Members', '', INDIVIDUALS, 'amber', 'assets/audio/04_individual_members.wav');
   await showInstruction('How each trial works', '', 'assets/audio/05_round_sequence.wav', INTRO_DIAGRAMS.trialFlow);
   await showInstruction('Public vs. private decisions', '', 'assets/audio/06_public_private.wav', INTRO_DIAGRAMS.visibility);
   await showInstruction('Your bonus', '', 'assets/audio/07_bonus.wav', INTRO_DIAGRAMS.bonus);

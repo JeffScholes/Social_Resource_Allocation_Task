@@ -60,11 +60,7 @@ p, li { font-size: clamp(1rem, 1.8vw, 1.2rem); line-height: 1.55; }
 .diagram-arrow.horizontal { display: inline-flex; align-items: center; }
 .diagram-caption { margin-top: 7px; color: #d8d8d8; font-size: .85rem; }
 .committee-diagram { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; }
-.recipients-diagram { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; }
-.recipient-branches { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
 .diagram-plus { color: #d8d8d8; font-size: 1.15rem; font-weight: 700; }
-.recipient-options { display: grid; gap: 5px; }
-.diagram-or { color: #aaa; font-size: .68rem; font-weight: 700; letter-spacing: .08em; }
 .salary-diagram { display: grid; align-content: center; gap: 14px; }
 .salary-row { display: grid; grid-template-columns: 100px 1fr; gap: 8px; align-items: center; }
 .diagram-row-label { color: #d8d8d8; font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-align: left; }
