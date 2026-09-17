@@ -42,6 +42,51 @@ p, li { font-size: clamp(1rem, 1.8vw, 1.2rem); line-height: 1.55; }
 .left { text-align: left; }
 .muted { color: #c7c7c7; font-size: .95rem; }
 .instruction-body { white-space: pre-line; max-width: 720px; margin: 0 auto 28px; }
+.instruction-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .9fr); gap: 28px; align-items: center; margin-bottom: 28px; text-align: left; }
+.instruction-layout .instruction-body { max-width: none; margin: 0; }
+.instruction-diagram { min-height: 205px; padding: 18px; border: 1px solid #707070; border-radius: 10px; background: #242424; color: #fff; text-align: center; }
+.diagram-card { display: inline-flex; flex-direction: column; justify-content: center; gap: 3px; min-height: 43px; padding: 9px 12px; border: 1px solid #aaa; border-radius: 7px; background: #171717; font-size: .76rem; font-weight: 700; letter-spacing: .04em; line-height: 1.15; }
+.diagram-card span { color: #d4d4d4; font-size: .66rem; font-weight: 400; letter-spacing: normal; }
+.diagram-you, .diagram-salary { border-color: #ddd; color: #fff; }
+.diagram-budget { border-color: #d8d8d8; background: #343434; font-size: 1rem; letter-spacing: normal; }
+.diagram-group { border-color: #00a6a6; color: #46d8d8; }
+.diagram-individual { border-color: #f2a633; color: #ffc25c; }
+.diagram-record { border-color: #e8b93e; color: #fff; }
+.diagram-private { border-color: #888; color: #e4e4e4; }
+.diagram-payment { border-color: #fff; background: #343434; color: #fff; }
+.diagram-arrow { color: #d8d8d8; font-size: 1.35rem; line-height: 1; }
+.diagram-arrow.horizontal { display: inline-flex; align-items: center; }
+.diagram-caption { margin-top: 7px; color: #d8d8d8; font-size: .85rem; }
+.committee-diagram { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; }
+.recipients-diagram { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; }
+.recipient-branches { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.diagram-plus { color: #d8d8d8; font-size: 1.15rem; font-weight: 700; }
+.recipient-options { display: grid; gap: 5px; }
+.diagram-or { color: #aaa; font-size: .68rem; font-weight: 700; letter-spacing: .08em; }
+.salary-diagram { display: grid; align-content: center; gap: 14px; }
+.salary-row { display: grid; grid-template-columns: 100px 1fr; gap: 8px; align-items: center; }
+.diagram-row-label { color: #d8d8d8; font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-align: left; }
+.salary-split { display: flex; align-items: stretch; gap: 5px; }
+.salary-split .diagram-card { flex: 1 1 0; min-width: 0; padding: 7px 5px; font-size: .63rem; }
+.salary-split .diagram-budget { flex: 0 0 52px; font-size: .82rem; }
+.flow-diagram, .ready-diagram { display: flex; align-items: stretch; justify-content: center; gap: 5px; }
+.flow-diagram { padding: 16px 10px; }
+.flow-diagram > b, .ready-diagram > b, .demo-flow > b { display: flex; align-items: center; color: #cfcfcf; }
+.flow-step { display: flex; flex: 1 1 0; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; padding: 8px 5px; border: 1px solid #999; border-radius: 6px; background: #171717; font-size: .68rem; font-weight: 700; line-height: 1.15; text-align: center; }
+.flow-step span { color: #bcbcbc; font-size: .7rem; }
+.visibility-diagram { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: center; }
+.visibility-path { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.visibility-path .diagram-card { width: 100%; min-height: 47px; padding: 8px 5px; font-size: .67rem; }
+.mini-record { height: 8px; margin-top: 4px; border: 1px solid #eee; border-radius: 99px; background: linear-gradient(90deg, #c83b3b 0%, #e8b93e 50%, #45a95a 100%); }
+.mini-record span { display: block; width: 10px; height: 10px; margin: -2px 0 0 60%; border: 2px solid #fff; border-radius: 50%; background: #171717; }
+.bonus-diagram { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; }
+.bonus-inputs { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.bonus-inputs .diagram-card { flex: 1 1 0; min-width: 0; }
+.demo-diagram { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 17px; }
+.demo-play { display: grid; place-items: center; width: 54px; height: 54px; padding-left: 3px; border: 2px solid #e8e8e8; border-radius: 50%; color: #fff; font-size: 1.4rem; }
+.demo-flow { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; color: #e2e2e2; font-size: .8rem; font-weight: 700; }
+.ready-diagram { align-items: center; padding: 30px 12px; }
+.ready-diagram .flow-step { max-width: 105px; min-height: 54px; }
 .primary, .secondary, .choice, .rating-option {
   border: 2px solid #aaa;
   border-radius: 8px;
@@ -114,6 +159,10 @@ video { display: block; width: 100%; max-height: min(60vh, 540px); background: #
 @media (max-width: 650px) {
   #app { padding: 12px; }
   .panel, .start-card { padding: 24px 18px; }
+  .instruction-layout { grid-template-columns: 1fr; gap: 20px; }
+  .instruction-layout .instruction-body { text-align: center; }
+  .salary-row { grid-template-columns: 1fr; gap: 5px; }
+  .diagram-row-label { text-align: center; }
   .task-header { grid-template-columns: 1fr; margin-top: 0; }
   .trial-grid { grid-template-columns: 1fr; }
   .likert-row { grid-template-columns: 1fr; }
