@@ -53,7 +53,7 @@ p, li { font-size: clamp(1rem, 1.8vw, 1.2rem); line-height: 1.55; }
 .diagram-budget { border-color: #d8d8d8; background: #343434; font-size: 1rem; letter-spacing: normal; }
 .diagram-group { border-color: #00a6a6; color: #46d8d8; }
 .diagram-individual { border-color: #f2a633; color: #ffc25c; }
-.diagram-record { border-color: #e8b93e; color: #fff; }
+.diagram-record { border-color: #00a6a6; color: #46d8d8; }
 .diagram-private { border-color: #888; color: #e4e4e4; }
 .diagram-payment { border-color: #fff; background: #343434; color: #fff; }
 .diagram-arrow { color: #d8d8d8; font-size: 1.35rem; line-height: 1; }
@@ -92,6 +92,7 @@ p, li { font-size: clamp(1rem, 1.8vw, 1.2rem); line-height: 1.55; }
 .dashboard-card { display: flex; flex-direction: column; justify-content: center; min-height: 72px; padding: 10px; border: 1px solid #707070; border-radius: 7px; background: #171717; text-align: left; }
 .dashboard-card span { color: #d6d6d6; font-size: .68rem; font-weight: 700; }
 .dashboard-card strong { margin-top: 6px; color: #fff; font-size: .98rem; }
+.dashboard-card.dashboard-record { border-color: #00a6a6; }
 .dashboard-card .mini-record { width: 100%; margin-top: 11px; }
 .ready-diagram { align-items: center; padding: 30px 12px; }
 .ready-diagram .flow-step { max-width: 105px; min-height: 54px; }
