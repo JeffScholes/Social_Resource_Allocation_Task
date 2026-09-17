@@ -87,6 +87,12 @@ p, li { font-size: clamp(1rem, 1.8vw, 1.2rem); line-height: 1.55; }
 .bonus-diagram { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; }
 .bonus-inputs { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
 .bonus-inputs .diagram-card { flex: 1 1 0; min-width: 0; }
+.dashboard-diagram { display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+.dashboard-preview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.dashboard-card { display: flex; flex-direction: column; justify-content: center; min-height: 72px; padding: 10px; border: 1px solid #707070; border-radius: 7px; background: #171717; text-align: left; }
+.dashboard-card span { color: #d6d6d6; font-size: .68rem; font-weight: 700; }
+.dashboard-card strong { margin-top: 6px; color: #fff; font-size: .98rem; }
+.dashboard-card .mini-record { width: 100%; margin-top: 11px; }
 .ready-diagram { align-items: center; padding: 30px 12px; }
 .ready-diagram .flow-step { max-width: 105px; min-height: 54px; }
 .primary, .secondary, .choice, .rating-option {
@@ -117,7 +123,7 @@ label { display: block; text-align: left; font-weight: 700; }
 .teal { --accent: #00a6a6; color: #46d8d8; }
 .amber { --accent: #f2a633; color: #ffc25c; }
 .fund { font-size: 1.3rem; font-weight: 700; margin: 0 0 25px; }
-.task-header { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: -14px 0 28px; text-align: left; }
+.task-header { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: -14px 0 28px; text-align: left; }
 .task-status-card { min-height: 76px; padding: 12px 14px; border: 1px solid #707070; border-radius: 8px; background: #252525; }
 .task-status-label { display: block; color: #d6d6d6; font-size: .9rem; font-weight: 700; margin-bottom: 7px; }
 .task-status-card strong { font-size: 1.45rem; }
@@ -165,6 +171,7 @@ video { display: block; width: 100%; max-height: min(60vh, 540px); background: #
   .instruction-layout .instruction-body { text-align: center; }
   .salary-row { grid-template-columns: 1fr; gap: 5px; }
   .diagram-row-label { text-align: center; }
+  .dashboard-preview { grid-template-columns: 1fr; }
   .task-header { grid-template-columns: 1fr; margin-top: 0; }
   .trial-grid { grid-template-columns: 1fr; }
   .likert-row { grid-template-columns: 1fr; }

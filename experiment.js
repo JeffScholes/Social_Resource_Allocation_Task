@@ -8,10 +8,15 @@ import { Scheduler } from 'https://pavlovia.org/lib/util.js';
 import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '1.6';
+const VERSION = '1.7';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
+// Provisional monitoring parameters. These can be optimised later when the
+// final trial count and decision model are set using BOED.
+const SALARY_STATUS_CHECK_INTERVAL = 3;
+const SALARY_EXPECTED_KEEP_PER_TRIAL = 500;
+const SALARY_STATUS_MARGIN = 150;
 const PILOT = true;
 const INPUT_GUARD_MS = 250;
 
@@ -67,6 +72,9 @@ const INTRO_DIAGRAMS = {
   bonus: `<div class="instruction-diagram bonus-diagram" role="img" aria-label="Your salary and community record contribute to a potential final payment.">
     <div class="bonus-inputs"><div class="diagram-card diagram-salary">YOUR SALARY</div><div class="diagram-plus">+</div><div class="diagram-card diagram-record">COMMUNITY RECORD</div></div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-payment">POTENTIAL FINAL PAYMENT</div>
   </div>`,
+  progress: `<div class="instruction-diagram dashboard-diagram" role="img" aria-label="Task header showing your salary, committee salary status, and community record.">
+    <div class="dashboard-preview"><div class="dashboard-card"><span>Your salary</span><strong>£3,400</strong></div><div class="dashboard-card"><span>Committee salary status</span><strong>On track</strong></div><div class="dashboard-card"><span>Community record</span><div class="mini-record"><span></span></div></div></div><p class="diagram-note">These indicators will remain visible throughout the task.</p>
+  </div>`,
   ready: `<div class="instruction-diagram ready-diagram" role="img" aria-label="You are ready to divide £1,000, predict a response, and see feedback."><div class="flow-step">Divide £1,000</div><b>→</b><div class="flow-step">Predict</div><b>→</b><div class="flow-step">See feedback</div></div>`,
 };
 
@@ -101,6 +109,18 @@ function nowSeconds() {
   return performance.now() / 1000;
 }
 
+function salaryStatusFor(balance, completedTrials) {
+  const expectedSalary = STARTING_BALANCE + (completedTrials * SALARY_EXPECTED_KEEP_PER_TRIAL);
+  const difference = balance - expectedSalary;
+  if (difference < -SALARY_STATUS_MARGIN) {
+    return { status: 'Below expected level', expectedSalary };
+  }
+  if (difference > SALARY_STATUS_MARGIN) {
+    return { status: 'Secure', expectedSalary };
+  }
+  return { status: 'On track', expectedSalary };
+}
+
 function render(content, extraClass = '') {
   app.innerHTML = `<section class="panel ${extraClass}">${content}</section>`;
 }
@@ -112,12 +132,14 @@ function taskHeaderHtml() {
     totalPublicDecisions,
     publicDecisionsReviewed,
     approvedPublicDecisions,
+    salaryStatus,
   } = taskStatus;
   const recordDisplay = publicDecisionsReviewed === 0
     ? '<p class="record-empty">No public decisions reviewed yet</p>'
     : `<div class="record-meter" role="progressbar" aria-label="Community record: ${approvedPublicDecisions} approved public decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`;
   return `<header class="task-header">
     <section class="task-status-card"><span class="task-status-label">Your salary</span><strong>£${personalFund.toFixed(2)}</strong></section>
+    <section class="task-status-card salary-status"><span class="task-status-label">Committee salary status</span><strong>${escapeHtml(salaryStatus)}</strong></section>
     <section class="task-status-card community-record"><span class="task-status-label">Community record</span>${recordDisplay}</section>
   </header>`;
 }
@@ -432,6 +454,9 @@ async function runTrials() {
     totalPublicDecisions: trials.filter((trial) => trial.type === 'group').length,
     publicDecisionsReviewed: 0,
     approvedPublicDecisions: 0,
+    salaryStatus: 'On track',
+    expectedSalary: STARTING_BALANCE,
+    salaryStatusUpdated: false,
   };
   for (const trial of trials) {
     const allocation = await chooseAllocation(trial, balance);
@@ -456,6 +481,14 @@ async function runTrials() {
         taskStatus.personalFund = balance;
       }
     }
+    if (trial.trial_num % SALARY_STATUS_CHECK_INTERVAL === 0 || trial.trial_num === trials.length) {
+      const salaryStatus = salaryStatusFor(balance, trial.trial_num);
+      taskStatus.salaryStatus = salaryStatus.status;
+      taskStatus.expectedSalary = salaryStatus.expectedSalary;
+      taskStatus.salaryStatusUpdated = true;
+    } else {
+      taskStatus.salaryStatusUpdated = false;
+    }
     writeEvent('trial', {
       trial_num: trial.trial_num,
       target_type: trial.type,
@@ -466,6 +499,9 @@ async function runTrials() {
       target_amount: allocation.choice.target_amount,
       generosity: allocation.choice.generosity,
       current_funds: balance,
+      committee_salary_status: taskStatus.salaryStatus,
+      committee_expected_salary: taskStatus.expectedSalary,
+      salary_status_updated: taskStatus.salaryStatusUpdated,
       allocation_response_time: allocation.responseTime,
       prediction_response_time: prediction.responseTime,
       confidence_response_time: confidence.responseTime,
@@ -542,6 +578,7 @@ async function runExperiment() {
   await showInstruction('How each trial works', '', 'assets/audio/05_round_sequence.wav', INTRO_DIAGRAMS.trialFlow);
   await showInstruction('Public vs. private decisions', '', 'assets/audio/06_public_private.wav', INTRO_DIAGRAMS.visibility);
   await showInstruction('Your bonus', '', 'assets/audio/07_bonus.wav', INTRO_DIAGRAMS.bonus);
+  await showInstruction('Monitoring your progress', 'The committee monitors whether you are maintaining an adequate salary level throughout the task. The exact criterion is not shown, but your salary status will be displayed.', null, INTRO_DIAGRAMS.progress);
   await showInstruction('Demonstration — before you begin', 'You will now see an example round.\n\nWatch how to make a decision, predict a response, view feedback, and choose whether to repair.');
   await showDemo();
   await showInstruction('Ready to begin', 'You will now begin the experiment.\n\nOn each trial, choose how to divide the amount shown between yourself and one group or individual. Then predict their response and rate your confidence.\n\nPlease respond as you genuinely would. There are no right or wrong answers.', null, INTRO_DIAGRAMS.ready);
