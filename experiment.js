@@ -282,7 +282,7 @@ async function showDemo() {
     start.disabled = true;
     video.currentTime = 0;
     video.play().catch(() => { status.textContent = 'Use the video controls to play the demonstration.'; video.controls = true; });
-    playNarration('assets/audio/08_demo_intro.wav', status);
+    playNarration('assets/audio/10_example_demo.wav', status);
     if (narration) narration.addEventListener('ended', () => { continueButton.disabled = false; }, { once: true });
   }, { once: true });
   await waitForButton('#continue');
@@ -572,16 +572,16 @@ async function finishExperiment() {
 async function runExperiment() {
   await showInstruction('Community Committee', '', 'assets/audio/01_community_committee.wav', INTRO_DIAGRAMS.committee);
   await showInstruction('Who will receive funds?', '', 'assets/audio/02_recipients.wav', INTRO_DIAGRAMS.salary);
-  await showInstruction('How evaluations work', '', null, INTRO_DIAGRAMS.evaluations);
   await showProfiles('Community Groups', '', GROUPS, 'teal', 'assets/audio/03_community_groups.wav');
   await showProfiles('Individual Committee Members', '', INDIVIDUALS, 'amber', 'assets/audio/04_individual_members.wav');
-  await showInstruction('How each trial works', '', 'assets/audio/05_round_sequence.wav', INTRO_DIAGRAMS.trialFlow);
-  await showInstruction('Public vs. private decisions', '', 'assets/audio/06_public_private.wav', INTRO_DIAGRAMS.visibility);
-  await showInstruction('Your bonus', '', 'assets/audio/07_bonus.wav', INTRO_DIAGRAMS.bonus);
-  await showInstruction('Monitoring your progress', 'The committee monitors whether you are maintaining an adequate salary level throughout the task. The exact criterion is not shown, but your salary status will be displayed.', null, INTRO_DIAGRAMS.progress);
-  await showInstruction('Demonstration — before you begin', 'You will now see an example round.\n\nWatch how to make a decision, predict a response, view feedback, and choose whether to repair.');
+  await showInstruction('How evaluations work', '', 'assets/audio/05_how_evaluations_work.wav', INTRO_DIAGRAMS.evaluations);
+  await showInstruction('How each trial works', '', 'assets/audio/06_round_sequence.wav', INTRO_DIAGRAMS.trialFlow);
+  await showInstruction('Public vs. private decisions', '', 'assets/audio/07_public_private.wav', INTRO_DIAGRAMS.visibility);
+  await showInstruction('Your bonus', '', 'assets/audio/08_bonus.wav', INTRO_DIAGRAMS.bonus);
+  await showInstruction('Monitoring your progress', '', 'assets/audio/09_monitoring_progress.wav', INTRO_DIAGRAMS.progress);
+  await showInstruction('Demonstration — before you begin', 'You will now see an example round.');
   await showDemo();
-  await showInstruction('Ready to begin', 'You will now begin the experiment.\n\nPlease respond as you genuinely would. There are no right or wrong answers.', null, INTRO_DIAGRAMS.ready);
+  await showInstruction('Ready to begin', 'You will now begin the experiment.\n\nPlease respond as you genuinely would. There are no right or wrong answers.', 'assets/audio/12_ready_to_begin.wav', INTRO_DIAGRAMS.ready);
   await runTrials();
   if (PILOT) await pilotChecks();
   await ethicalDebrief();
