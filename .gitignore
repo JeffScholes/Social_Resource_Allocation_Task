@@ -3,6 +3,7 @@
 Thumbs.db
 .idea/
 .vscode/
+.venv/
 
 # Temporary browser-test output
 data/
