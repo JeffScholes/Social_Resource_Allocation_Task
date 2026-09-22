@@ -133,7 +133,7 @@ label { display: block; text-align: left; font-weight: 700; }
 .record-meter { position: relative; height: 18px; margin-top: 8px; border: 1px solid #e5e5e5; border-radius: 999px; background: linear-gradient(90deg, #c83b3b 0%, #e8b93e 50%, #45a95a 100%); }
 .record-marker { position: absolute; top: 50%; width: 22px; height: 22px; transform: translate(-50%, -50%); border: 3px solid #fff; border-radius: 50%; background: #171717; box-shadow: 0 0 0 1px #000; transition: left .35s ease-out; }
 .trial-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(220px, .8fr); gap: 28px; align-items: center; }
-.recipient-label { margin: 0 0 8px; text-align: left; font-weight: 700; }
+.recipient-label { margin: 0 0 8px; text-align: center; font-weight: 700; }
 .choices { display: grid; gap: 12px; }
 .choice { min-height: 70px; font-size: 1.05rem; }
 .allocation { min-width: 0; padding: 15px 18px; text-align: left; }
