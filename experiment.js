@@ -275,21 +275,29 @@ async function showDemo() {
     <p id="demo-status" class="audio-status">The demonstration has not started.</p>
     <div class="actions"><button id="start-demo" class="primary">Start demonstration</button><button id="continue" class="primary" disabled>Continue</button></div>`);
   const video = document.querySelector('#demo-video');
+  const demoAudio = new Audio('assets/audio/11_demo.wav');
+  demoAudio.preload = 'auto';
   const status = document.querySelector('#demo-status');
   const start = document.querySelector('#start-demo');
   const continueButton = document.querySelector('#continue');
   video.addEventListener('ended', () => {
+    demoAudio.pause();
+    demoAudio.currentTime = 0;
     status.textContent = 'Demonstration finished.';
     continueButton.disabled = false;
   });
   start.addEventListener('click', () => {
     start.disabled = true;
     video.currentTime = 0;
-    video.play().catch(() => { status.textContent = 'Use the video controls to play the demonstration.'; video.controls = true; });
+    demoAudio.currentTime = 0;
+    Promise.all([video.play(), demoAudio.play()])
+      .then(() => { status.textContent = 'Demonstration playing.'; })
+      .catch(() => { status.textContent = 'The demonstration could not start. Use the video controls to try again.'; video.controls = true; });
   }, { once: true });
   await waitForButton('#continue');
   stopNarration();
   video.pause();
+  demoAudio.pause();
 }
 
 function buildTargets() {
@@ -577,7 +585,7 @@ async function runExperiment() {
   await showInstruction('Public vs. private decisions', '', 'assets/audio/07_public_private.wav', INTRO_DIAGRAMS.visibility);
   await showInstruction('Your bonus', '', 'assets/audio/08_bonus.wav', INTRO_DIAGRAMS.bonus);
   await showInstruction('Monitoring your progress', '', 'assets/audio/09_monitoring_progress.wav', INTRO_DIAGRAMS.progress);
-  await showInstruction('Demonstration — before you begin', 'You will now see an example round.', 'assets/audio/11_demo.wav');
+  await showInstruction('Demonstration — before you begin', 'You will now see an example round.');
   await showDemo();
   await showInstruction('Ready to begin', 'You will now begin the experiment.\n\nPlease respond as you genuinely would. There are no right or wrong answers.', 'assets/audio/12_ready_to_begin.wav', INTRO_DIAGRAMS.ready);
   await runTrials();
