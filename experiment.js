@@ -273,27 +273,37 @@ async function showDemo() {
   render(`<h2>Example round</h2><p class="instruction-body">Select <strong>Start demonstration</strong> to play the example. The screen will become available to continue after the video ends.</p>
     <div class="video-wrap"><video id="demo-video" playsinline muted preload="metadata"><source src="assets/task_demo.mp4" type="video/mp4"></video></div>
     <p id="demo-status" class="audio-status">The demonstration has not started.</p>
-    <div class="actions"><button id="start-demo" class="primary">Start demonstration</button><button id="continue" class="primary" disabled>Continue</button></div>`);
+    <div class="actions"><button id="start-demo" class="primary">Start demonstration</button><button id="replay-demo" class="secondary" hidden>Replay</button><button id="continue" class="primary" disabled>Continue</button></div>`);
   const video = document.querySelector('#demo-video');
   const demoAudio = new Audio('assets/audio/11_demo.wav');
   demoAudio.preload = 'auto';
   const status = document.querySelector('#demo-status');
   const start = document.querySelector('#start-demo');
+  const replay = document.querySelector('#replay-demo');
   const continueButton = document.querySelector('#continue');
   video.addEventListener('ended', () => {
     demoAudio.pause();
     demoAudio.currentTime = 0;
     status.textContent = 'Demonstration finished.';
+    replay.hidden = false;
+    replay.disabled = false;
     continueButton.disabled = false;
   });
-  start.addEventListener('click', () => {
+  const playDemo = () => {
     start.disabled = true;
+    replay.disabled = true;
     video.currentTime = 0;
     demoAudio.currentTime = 0;
     Promise.all([video.play(), demoAudio.play()])
       .then(() => { status.textContent = 'Demonstration playing.'; })
-      .catch(() => { status.textContent = 'The demonstration could not start. Use the video controls to try again.'; video.controls = true; });
-  }, { once: true });
+      .catch(() => {
+        status.textContent = 'The demonstration could not start. Use the video controls to try again.';
+        replay.disabled = false;
+        video.controls = true;
+      });
+  };
+  start.addEventListener('click', playDemo, { once: true });
+  replay.addEventListener('click', playDemo);
   await waitForButton('#continue');
   stopNarration();
   video.pause();
