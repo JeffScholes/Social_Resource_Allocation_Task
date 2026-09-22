@@ -271,7 +271,7 @@ async function showProfiles(title, subtitle, targets, theme, audioPath) {
 
 async function showDemo() {
   render(`<h2>Example round</h2><p class="instruction-body">Select <strong>Start demonstration</strong> to play the example. The screen will become available to continue after the video ends.</p>
-    <div class="video-wrap"><video id="demo-video" playsinline muted preload="metadata"><source src="assets/task_demo_slow.mp4" type="video/mp4"></video></div>
+    <div class="video-wrap"><video id="demo-video" playsinline muted preload="metadata"><source src="assets/task_demo.mp4" type="video/mp4"></video></div>
     <p id="demo-status" class="audio-status">The demonstration has not started.</p>
     <div class="actions"><button id="start-demo" class="primary">Start demonstration</button><button id="continue" class="primary" disabled>Continue</button></div>`);
   const video = document.querySelector('#demo-video');
@@ -577,7 +577,7 @@ async function runExperiment() {
   await showInstruction('Public vs. private decisions', '', 'assets/audio/07_public_private.wav', INTRO_DIAGRAMS.visibility);
   await showInstruction('Your bonus', '', 'assets/audio/08_bonus.wav', INTRO_DIAGRAMS.bonus);
   await showInstruction('Monitoring your progress', '', 'assets/audio/09_monitoring_progress.wav', INTRO_DIAGRAMS.progress);
-  await showInstruction('Demonstration — before you begin', 'You will now see an example round.', 'assets/audio/10_example_demo.wav');
+  await showInstruction('Demonstration — before you begin', 'You will now see an example round.', 'assets/audio/11_demo.wav');
   await showDemo();
   await showInstruction('Ready to begin', 'You will now begin the experiment.\n\nPlease respond as you genuinely would. There are no right or wrong answers.', 'assets/audio/12_ready_to_begin.wav', INTRO_DIAGRAMS.ready);
   await runTrials();
