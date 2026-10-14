@@ -9,7 +9,7 @@ import * as util from 'https://pavlovia.org/lib/util.js';
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
 const VERSION = '1.7';
-const N_TRIALS = 10;
+const N_TRIALS = 40;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
 // Provisional monitoring parameters. These can be optimised later when the
@@ -335,8 +335,8 @@ function initialiseHiddenTargets() {
   const johnYouth = Math.random() < 0.5;
   return {
     groups: {
-      youth: { threshold: youthLenient ? 0.4 : 0.6, assignment: youthLenient ? 'lenient' : 'strict' },
-      sports: { threshold: youthLenient ? 0.6 : 0.4, assignment: youthLenient ? 'strict' : 'lenient' },
+      youth: { threshold: youthLenient ? 0.3 : 0.7, assignment: youthLenient ? 'lenient' : 'strict' },
+      sports: { threshold: youthLenient ? 0.7 : 0.3, assignment: youthLenient ? 'strict' : 'lenient' },
     },
     individuals: { john: johnYouth ? 'youth' : 'sports', julia: johnYouth ? 'sports' : 'youth' },
   };
