@@ -10,7 +10,7 @@ const { Scheduler } = util;
 
 const EXPERIMENT_NAME = 'Storm_Recovery_Resource_Allocation_Task';
 const VERSION = '0.1.0';
-const N_TRIALS = 40;
+const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
 // Provisional monitoring parameters. These can be optimised later when the
@@ -35,18 +35,6 @@ const SPLIT_OPTIONS = [
   { id: 3, self_amount: 500, target_amount: 500 },
   { id: 4, self_amount: 400, target_amount: 600 },
 ];
-const SSGS_ITEMS = {
-  1: 'I want to sink into the floor and disappear.',
-  2: 'I feel remorse, regret.',
-  3: 'I feel small.',
-  4: 'I feel tension about something I have done.',
-  5: 'I feel like I am a bad person.',
-  6: 'I cannot stop thinking about something bad I have done.',
-  7: 'I feel humiliated, disgraced.',
-  8: 'I feel like apologizing, confessing.',
-  9: 'I feel worthless, powerless.',
-  10: 'I feel bad about something I have done.',
-};
 const INTRO_DIAGRAMS = {
   committee: `<div class="instruction-diagram committee-diagram" role="img" aria-label="You are a temporary recovery coordinator who decides how a £1,000 storm-recovery budget is divided.">
     <div class="diagram-card diagram-you">YOU<span>Temporary recovery coordinator</span></div>
@@ -86,8 +74,6 @@ let participantId = '';
 let narration = null;
 let inputAllowedAfter = 0;
 let psychoJSStarted = false;
-let shamePool = [];
-let guiltPool = [];
 let taskStatus = null;
 
 function escapeHtml(value) {
@@ -386,15 +372,6 @@ async function showFeedback(trial, feedback) {
   await waitForButton('#continue');
 }
 
-function nextAlternateItem(type) {
-  const pool = type === 'shame' ? shamePool : guiltPool;
-  if (pool.length === 0) {
-    const items = type === 'shame' ? [1, 3, 5, 7, 9] : [2, 4, 6, 8, 10];
-    if (type === 'shame') shamePool = shuffle(items); else guiltPool = shuffle(items);
-  }
-  return type === 'shame' ? shamePool.pop() : guiltPool.pop();
-}
-
 function emotionProbeSchedule(nTrials) {
   const counts = [];
   for (let count = 5; count <= Math.floor(nTrials / 2); count += 5) counts.push(count);
@@ -406,24 +383,25 @@ function emotionProbeSchedule(nTrials) {
 }
 
 async function emotionProbe() {
-  const itemNumbers = shuffle([nextAlternateItem('shame'), nextAlternateItem('guilt')]);
-  const rows = itemNumbers.map((item) => `<div class="likert-row"><p>${escapeHtml(SSGS_ITEMS[item])}</p><div class="scale">${[1, 2, 3, 4, 5].map((rating) => `<button class="rating-option emotion-${item}" data-value="${rating}">${rating}</button>`).join('')}</div></div>`).join('');
-  renderTask(`<h2>Right now, how much do you feel each of the following?</h2><p class="muted">1 = Not at all &nbsp;&nbsp; 3 = Somewhat &nbsp;&nbsp; 5 = Very strongly</p>${rows}<div class="actions"><button id="continue" class="primary" disabled>Continue</button></div>`);
+  renderTask(`<h2>Right now, to what extent do you feel each of the following emotions?</h2>
+    <div class="question emotion-slider"><label for="shame-rating">Shame</label><input id="shame-rating" type="range" min="0" max="100" value="50" aria-describedby="shame-anchors"><div id="shame-anchors" class="slider-labels muted"><span>Not at all</span><span>Extremely</span></div></div>
+    <div class="question emotion-slider"><label for="guilt-rating">Guilt</label><input id="guilt-rating" type="range" min="0" max="100" value="50" aria-describedby="guilt-anchors"><div id="guilt-anchors" class="slider-labels muted"><span>Not at all</span><span>Extremely</span></div></div>
+    <div class="actions"><button id="continue" class="primary" disabled>Continue</button></div>`);
   const onset = nowSeconds();
-  const responses = {};
-  itemNumbers.forEach((item) => {
-    document.querySelectorAll(`.emotion-${item}`).forEach((button) => button.addEventListener('click', () => {
-      document.querySelectorAll(`.emotion-${item}`).forEach((candidate) => candidate.classList.remove('selected'));
-      button.classList.add('selected');
-      responses[item] = Number(button.dataset.value);
-      document.querySelector('#continue').disabled = itemNumbers.some((number) => responses[number] === undefined);
-    }));
+  const touched = { shame: false, guilt: false };
+  ['shame', 'guilt'].forEach((emotion) => {
+    const slider = document.querySelector(`#${emotion}-rating`);
+    slider.addEventListener('input', () => {
+      touched[emotion] = true;
+      document.querySelector('#continue').disabled = !touched.shame || !touched.guilt;
+    });
   });
   await waitForButton('#continue');
-  const responseRow = Object.fromEntries(Object.keys(SSGS_ITEMS).map((item) => [item, responses[item] ?? '']));
-  const shameItem = itemNumbers.find((item) => item % 2 === 1);
-  const guiltItem = itemNumbers.find((item) => item % 2 === 0);
-  return { responses: responseRow, shame: responses[shameItem], guilt: responses[guiltItem], responseTime: nowSeconds() - onset };
+  return {
+    shameRating: Number(document.querySelector('#shame-rating').value),
+    guiltRating: Number(document.querySelector('#guilt-rating').value),
+    responseTime: nowSeconds() - onset,
+  };
 }
 
 async function chooseRepair(trial) {
@@ -505,12 +483,9 @@ async function runTrials() {
       approval_probability: feedback.approval_probability,
       approval_threshold: feedback.threshold,
       repair_choice: repair.repairChoice,
-      SSGS_1: emotion ? emotion.responses[1] : '', SSGS_2: emotion ? emotion.responses[2] : '',
-      SSGS_3: emotion ? emotion.responses[3] : '', SSGS_4: emotion ? emotion.responses[4] : '',
-      SSGS_5: emotion ? emotion.responses[5] : '', SSGS_6: emotion ? emotion.responses[6] : '',
-      SSGS_7: emotion ? emotion.responses[7] : '', SSGS_8: emotion ? emotion.responses[8] : '',
-      SSGS_9: emotion ? emotion.responses[9] : '', SSGS_10: emotion ? emotion.responses[10] : '',
-      SSGS_shame: emotion ? emotion.shame : '', SSGS_guilt: emotion ? emotion.guilt : '',
+      emotion_probe_presented: emotion ? 1 : 0,
+      shame_rating: emotion ? emotion.shameRating : '',
+      guilt_rating: emotion ? emotion.guiltRating : '',
     });
   }
   taskStatus = null;

@@ -36,6 +36,10 @@ using the study's approved procedure.
   hand-coded browser interface.
 - Trial and pilot-check values are written as normal PsychoJS data rows. Pilot
   checks are stored in a final row with `record_type = pilot_checks`.
+- Intermittent emotion probes use separate 0--100 current-state ratings for
+  shame and guilt. Trial rows record these as `shame_rating` and
+  `guilt_rating`, with `emotion_probe_presented` indicating whether a rating
+  was collected on that trial.
 - The feedback mechanism, including the hidden resident--service pairing and
   threshold structure, is simulated. Do not change it without also updating
   the debrief and ethics documentation.
