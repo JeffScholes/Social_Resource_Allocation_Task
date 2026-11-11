@@ -26,8 +26,8 @@ const GROUPS = [
   { id: 'essentials', name: 'Essential Recovery Fund', type: 'group', description: 'Provides food, hygiene supplies, transport, and essential household items during recovery.', image: 'assets/images/essential_recovery_fund.png' },
 ];
 const INDIVIDUALS = [
-  { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Was displaced by the storm and is seeking support with immediate recovery costs.', image: 'assets/images/john_smith.png' },
-  { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Their household was affected by the storm and they are seeking support to restore day-to-day stability.', image: 'assets/images/julia_hart.png' },
+  { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/john_smith.png' },
+  { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/julia_hart.png' },
 ];
 const SPLIT_OPTIONS = [
   { id: 1, self_amount: 700, target_amount: 300 },
@@ -286,7 +286,7 @@ function feedbackFor(trial, choice, hidden) {
 
 function targetCard(trial) {
   const theme = trial.type === 'group' ? 'teal' : 'amber';
-  return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${trial.type === 'group' ? 'Recovery service' : 'Affected resident'}: ${escapeHtml(trial.name)}</h3><p>${escapeHtml(trial.description)}</p></aside>`;
+  return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3><p>${escapeHtml(trial.description)}</p></aside>`;
 }
 
 async function chooseAllocation(trial, balance) {
@@ -307,8 +307,8 @@ async function chooseAllocation(trial, balance) {
 
 async function choosePrediction(trial) {
   const question = trial.type === 'group'
-    ? `Do the ${trial.name} representatives think your allocation provided fair recovery support?`
-    : `Does ${trial.name} think your allocation treated their recovery needs fairly?`;
+    ? `Do the ${trial.name} representatives think your allocation aligned with their standards for fair disaster recovery support?`
+    : `Does ${trial.name} think your allocation treated them fairly?`;
   renderTask(`<h2>${question}</h2><div class="prediction-target">${targetCard(trial)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">YES</button><button class="primary prediction" data-value="disapprove">NO</button></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
@@ -324,15 +324,15 @@ async function chooseConfidence() {
 }
 
 async function fetchingEvaluation() {
-  renderTask('<p class="fetching">The recovery feedback is being considered…</p>');
+  renderTask('<p class="fetching">Fetching disaster recovery evaluation...</p>');
   await new Promise((resolve) => window.setTimeout(resolve, 1500));
 }
 
 async function showFeedback(trial, feedback) {
   const isGroup = trial.type === 'group';
   const message = isGroup
-    ? (feedback.approved ? `The ${trial.name} representatives judged that your allocation met their standard for fair recovery support.` : `The ${trial.name} representatives judged that your allocation did not meet their standard for fair recovery support.`)
-    : (feedback.approved ? `${trial.name} judged that the allocation treated their recovery needs fairly.` : `${trial.name} judged that the allocation did not meet their immediate recovery needs and felt unfairly treated.`);
+    ? (feedback.approved ? `The ${trial.name} representatives judged that your allocation met their standards for fair disaster support.` : `The ${trial.name} representatives judged that your allocation did not meet their standards for fair disaster recovery support.`)
+    : (feedback.approved ? `${trial.name} judged that your allocation treated their recovery needs fairly.` : `${trial.name} judged that your allocation did not treat their recovery needs fairly.`);
   const visibility = isGroup ? 'This service decision will appear on your recovery accountability record.' : `This resident decision will only be visible to you and ${trial.name}.`;
   renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div><p>${visibility}</p><div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
