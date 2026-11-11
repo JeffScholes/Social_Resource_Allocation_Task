@@ -8,8 +8,8 @@ import { core, util } from './lib/psychojs-2024.1.0.js';
 const { PsychoJS } = core;
 const { Scheduler } = util;
 
-const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
-const VERSION = '1.7';
+const EXPERIMENT_NAME = 'Storm_Recovery_Resource_Allocation_Task';
+const VERSION = '0.1.0';
 const N_TRIALS = 40;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
@@ -22,12 +22,12 @@ const PILOT = true;
 const INPUT_GUARD_MS = 250;
 
 const GROUPS = [
-  { id: 'youth', name: 'Youth Fund', type: 'group', description: 'Fund for after-school programmes, looking to install after school music activities.', image: 'assets/images/youth_fund.png' },
-  { id: 'sports', name: 'Sports Fund', type: 'group', description: 'Fund towards local sports facilities, looking to build multi-use games areas.', image: 'assets/images/sports_fund.png' },
+  { id: 'shelter', name: 'Temporary Shelter Fund', type: 'group', description: 'Provides safe short-term accommodation, bedding, and basic support for residents displaced by the storm.', image: 'assets/images/temporary_shelter_fund.png' },
+  { id: 'essentials', name: 'Essential Recovery Fund', type: 'group', description: 'Provides food, hygiene supplies, transport, and essential household items during recovery.', image: 'assets/images/essential_recovery_fund.png' },
 ];
 const INDIVIDUALS = [
-  { id: 'john', name: 'John Smith', type: 'individual', description: 'Represents local residents on the committee.', image: 'assets/images/john_smith.png' },
-  { id: 'julia', name: 'Julia Hart', type: 'individual', description: 'Represents local residents on the committee.', image: 'assets/images/julia_hart.png' },
+  { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Was displaced by the storm and is seeking support with immediate recovery costs.', image: 'assets/images/john_smith.png' },
+  { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Their household was affected by the storm and they are seeking support to restore day-to-day stability.', image: 'assets/images/julia_hart.png' },
 ];
 const SPLIT_OPTIONS = [
   { id: 1, self_amount: 700, target_amount: 300 },
@@ -48,47 +48,45 @@ const SSGS_ITEMS = {
   10: 'I feel bad about something I have done.',
 };
 const INTRO_DIAGRAMS = {
-  committee: `<div class="instruction-diagram committee-diagram" role="img" aria-label="You are a temporary fund manager who decides how £1,000 is divided.">
-    <div class="diagram-card diagram-you">YOU<span>Temporary fund manager</span></div>
+  committee: `<div class="instruction-diagram committee-diagram" role="img" aria-label="You are a temporary recovery coordinator who decides how a £1,000 storm-recovery budget is divided.">
+    <div class="diagram-card diagram-you">YOU<span>Temporary recovery coordinator</span></div>
     <div class="diagram-arrow">↓</div>
-    <div class="diagram-card diagram-budget">£1,000<span>Decision budget</span></div>
+    <div class="diagram-card diagram-budget">£1,000<span>Storm-recovery budget</span></div>
     <div class="diagram-arrow">↓</div>
-    <div class="diagram-caption">Decide how it is divided</div>
+    <div class="diagram-caption">Decide how it is allocated</div>
   </div>`,
-  salary: `<div class="instruction-diagram salary-diagram" role="img" aria-label="Individual rounds divide £1,000 between your salary and a member's salary. Group rounds divide £1,000 between your salary and a community project.">
-    <div class="salary-row"><span class="diagram-row-label">INDIVIDUAL ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">YOUR SALARY</div><span class="diagram-plus">+</span><div class="diagram-card diagram-individual">MEMBER SALARY</div></div></div>
-    <div class="salary-row"><span class="diagram-row-label">GROUP ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">YOUR SALARY</div><span class="diagram-plus">+</span><div class="diagram-card diagram-group">COMMUNITY PROJECT</div></div></div>
+  salary: `<div class="instruction-diagram salary-diagram" role="img" aria-label="Individual rounds divide £1,000 between your personal payment and an affected resident's recovery support. Service rounds divide £1,000 between your personal payment and a recovery service.">
+    <div class="salary-row"><span class="diagram-row-label">RESIDENT ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><span class="diagram-plus">+</span><div class="diagram-card diagram-individual">RESIDENT SUPPORT</div></div></div>
+    <div class="salary-row"><span class="diagram-row-label">SERVICE ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><span class="diagram-plus">+</span><div class="diagram-card diagram-group">RECOVERY SERVICE</div></div></div>
   </div>`,
-  evaluations: `<div class="instruction-diagram evaluations-diagram" role="img" aria-label="Groups evaluate decisions against community standards. Individuals evaluate whether they were treated fairly.">
-    <div class="evaluation-path"><div class="diagram-card diagram-group">COMMUNITY GROUPS</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-evaluation">COMMUNITY STANDARDS<span>Was the decision socially appropriate?</span></div></div>
-    <div class="evaluation-path"><div class="diagram-card diagram-individual">INDIVIDUAL MEMBERS</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-evaluation">FAIR TREATMENT<span>Was the individual treated fairly?</span></div></div>
+  evaluations: `<div class="instruction-diagram evaluations-diagram" role="img" aria-label="Recovery services evaluate decisions against their fair-support standards. Affected residents evaluate whether their needs were treated fairly.">
+    <div class="evaluation-path"><div class="diagram-card diagram-group">RECOVERY SERVICES</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-evaluation">FAIR SUPPORT<span>Did the allocation meet the service's standard?</span></div></div>
+    <div class="evaluation-path"><div class="diagram-card diagram-individual">AFFECTED RESIDENTS</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-evaluation">FAIR TREATMENT<span>Did the allocation meet the resident's needs fairly?</span></div></div>
   </div>`,
   trialFlow: `<div class="instruction-diagram flow-diagram" role="img" aria-label="The trial sequence is choose a split, predict the response, rate confidence, see feedback, and repair only after a negative evaluation.">
     <div class="flow-steps"><div class="flow-step"><span>1</span>Choose split</div><b>→</b><div class="flow-step"><span>2</span>Predict response</div><b>→</b><div class="flow-step"><span>3</span>Confidence</div><b>→</b><div class="flow-step"><span>4</span>Feedback</div><b>→</b><div class="flow-step"><span>5</span>Repair only after negative evaluation</div></div><p class="diagram-note">Occasionally you will rate how you feel.</p>
   </div>`,
-  visibility: `<div class="instruction-diagram visibility-diagram" role="img" aria-label="Group decisions are public and update the community record. Individual decisions are private.">
-    <div class="visibility-path"><div class="diagram-card diagram-group">GROUP DECISION</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-record">COMMUNITY RECORD<div class="mini-record"><span></span></div></div></div>
-    <div class="visibility-path"><div class="diagram-card diagram-individual">INDIVIDUAL DECISION</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-private">PRIVATE<span>Only you and the individual</span></div></div>
+  visibility: `<div class="instruction-diagram visibility-diagram" role="img" aria-label="Service decisions are public and update the recovery accountability record. Resident decisions are private.">
+    <div class="visibility-path"><div class="diagram-card diagram-group">SERVICE DECISION</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-record">ACCOUNTABILITY RECORD<div class="mini-record"><span></span></div></div></div>
+    <div class="visibility-path"><div class="diagram-card diagram-individual">RESIDENT DECISION</div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-private">PRIVATE<span>Only you and the resident</span></div></div>
   </div>`,
-  bonus: `<div class="instruction-diagram bonus-diagram" role="img" aria-label="Your salary and community record contribute to a potential final payment.">
-    <div class="bonus-inputs"><div class="diagram-card diagram-salary">YOUR SALARY</div><div class="diagram-plus">+</div><div class="diagram-card diagram-record">COMMUNITY RECORD</div></div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-payment">POTENTIAL FINAL PAYMENT</div>
+  bonus: `<div class="instruction-diagram bonus-diagram" role="img" aria-label="Your personal payment and accountability record contribute to a potential final payment.">
+    <div class="bonus-inputs"><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><div class="diagram-plus">+</div><div class="diagram-card diagram-record">ACCOUNTABILITY RECORD</div></div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-payment">POTENTIAL FINAL PAYMENT</div>
   </div>`,
-  progress: `<div class="instruction-diagram dashboard-diagram" role="img" aria-label="Task header showing your salary, salary status, and community record.">
-    <div class="dashboard-preview"><div class="dashboard-card"><span>Your salary</span><strong>£3,400</strong></div><div class="dashboard-card"><span>Salary status</span><strong>On track</strong></div><div class="dashboard-card dashboard-record"><span>Community record</span><div class="mini-record"><span></span></div></div></div><p class="diagram-note">These indicators will remain visible throughout the task.</p>
+  progress: `<div class="instruction-diagram dashboard-diagram" role="img" aria-label="Task header showing your personal payment, payment status, and accountability record.">
+    <div class="dashboard-preview"><div class="dashboard-card"><span>Personal payment</span><strong>£3,400</strong></div><div class="dashboard-card"><span>Payment status</span><strong>On track</strong></div><div class="dashboard-card dashboard-record"><span>Accountability record</span><div class="mini-record"><span></span></div></div></div><p class="diagram-note">These indicators will remain visible throughout the task.</p>
   </div>`,
-  ready: `<div class="instruction-diagram ready-diagram" role="img" aria-label="You are ready to divide £1,000, predict a response, and see feedback."><div class="flow-step">Divide £1,000</div><b>→</b><div class="flow-step">Predict</div><b>→</b><div class="flow-step">See feedback</div></div>`,
+  ready: `<div class="instruction-diagram ready-diagram" role="img" aria-label="You are ready to allocate £1,000, predict a response, and see feedback."><div class="flow-step">Allocate £1,000</div><b>→</b><div class="flow-step">Predict</div><b>→</b><div class="flow-step">See feedback</div></div>`,
 };
 
 const app = document.querySelector('#app');
 const psychoJS = new PsychoJS({ debug: false });
 let expInfo = {};
 let participantId = '';
-let narration = null;
 let inputAllowedAfter = 0;
 let psychoJSStarted = false;
 let shamePool = [];
 let guiltPool = [];
-let audioUnlocker = null;
 let taskStatus = null;
 
 function escapeHtml(value) {
@@ -136,46 +134,17 @@ function taskHeaderHtml() {
     salaryStatus,
   } = taskStatus;
   const recordDisplay = publicDecisionsReviewed === 0
-    ? '<p class="record-empty">No public decisions reviewed yet</p>'
-    : `<div class="record-meter" role="progressbar" aria-label="Community record: ${approvedPublicDecisions} approved public decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`;
+    ? '<p class="record-empty">No public service decisions reviewed yet</p>'
+    : `<div class="record-meter" role="progressbar" aria-label="Recovery accountability record: ${approvedPublicDecisions} approved public service decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`;
   return `<header class="task-header">
-    <section class="task-status-card"><span class="task-status-label">Your salary</span><strong>£${personalFund.toFixed(2)}</strong></section>
-    <section class="task-status-card salary-status"><span class="task-status-label">Salary status</span><strong>${escapeHtml(salaryStatus)}</strong></section>
-    <section class="task-status-card community-record"><span class="task-status-label">Community record</span>${recordDisplay}</section>
+    <section class="task-status-card"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong></section>
+    <section class="task-status-card salary-status"><span class="task-status-label">Payment status</span><strong>${escapeHtml(salaryStatus)}</strong></section>
+    <section class="task-status-card community-record"><span class="task-status-label">Accountability record</span>${recordDisplay}</section>
   </header>`;
 }
 
 function renderTask(content, extraClass = '') {
   render(`${taskHeaderHtml()}${content}`, extraClass);
-}
-
-function stopNarration() {
-  if (narration) {
-    narration.pause();
-    narration.currentTime = 0;
-    narration = null;
-  }
-}
-
-function playNarration(path, statusNode = null) {
-  stopNarration();
-  narration = new Audio(path);
-  narration.preload = 'auto';
-  narration.addEventListener('ended', () => {
-    if (statusNode) statusNode.textContent = 'Narration finished.';
-  });
-  narration.play().then(() => {
-    if (statusNode) statusNode.textContent = 'Narration playing.';
-  }).catch(() => {
-    if (statusNode) statusNode.textContent = 'Narration is ready. Select “Play narration” if it did not start.';
-  });
-}
-
-function attachReplay(path) {
-  const replay = document.querySelector('#replay-audio');
-  const status = document.querySelector('#audio-status');
-  if (!replay || !status) return;
-  replay.addEventListener('click', () => playNarration(path, status));
 }
 
 function waitForButton(selector) {
@@ -229,29 +198,20 @@ async function startPsychoJS() {
   psychoJSStarted = true;
 }
 
-function instructionHtml(title, body, audioPath = null, diagram = '') {
-  const audioControls = audioPath ? `
-    <div class="actions"><button id="replay-audio" class="secondary">Play narration</button></div>
-    <p id="audio-status" class="audio-status">Narration starting…</p>` : '';
+function instructionHtml(title, body, diagram = '') {
   const instructionContent = diagram
     ? `<div class="instruction-layout${body ? '' : ' diagram-only'}">${body ? `<p class="instruction-body">${body}</p>` : ''}${diagram}</div>`
     : `<p class="instruction-body">${body}</p>`;
-  return `<h2>${title}</h2>${instructionContent}${audioControls}
+  return `<h2>${title}</h2>${instructionContent}
     <div class="actions"><button id="continue" class="primary">Continue</button></div>`;
 }
 
-async function showInstruction(title, body, audioPath = null, diagram = '') {
-  render(instructionHtml(title, body, audioPath, diagram));
-  if (audioPath) {
-    const status = document.querySelector('#audio-status');
-    playNarration(audioPath, status);
-    attachReplay(audioPath);
-  }
+async function showInstruction(title, body, diagram = '') {
+  render(instructionHtml(title, body, diagram));
   await waitForButton('#continue');
-  stopNarration();
 }
 
-async function showProfiles(title, subtitle, targets, theme, audioPath) {
+async function showProfiles(title, subtitle, targets, theme) {
   const cards = targets.map((target) => `
     <article class="profile ${theme}">
       <img src="${target.image}" alt="${escapeHtml(target.name)}">
@@ -261,54 +221,21 @@ async function showProfiles(title, subtitle, targets, theme, audioPath) {
   const subtitleHtml = subtitle ? `<p class="instruction-body">${subtitle}</p>` : '';
   render(`<h2>${title}</h2>${subtitleHtml}
     <div class="profiles">${cards}</div>
-    <div class="actions"><button id="replay-audio" class="secondary">Play narration</button><button id="continue" class="primary">Continue</button></div>
-    <p id="audio-status" class="audio-status">Narration starting…</p>`);
-  const status = document.querySelector('#audio-status');
-  playNarration(audioPath, status);
-  attachReplay(audioPath);
+    <div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
-  stopNarration();
 }
 
 async function showDemo() {
-  render(`<h2>Example round</h2><p class="instruction-body">Select <strong>Start demonstration</strong> to play the example. The screen will become available to continue after the video ends.</p>
-    <div class="video-wrap"><video id="demo-video" playsinline muted preload="metadata"><source src="assets/task_demo.mp4" type="video/mp4"></video></div>
-    <p id="demo-status" class="audio-status">The demonstration has not started.</p>
-    <div class="actions"><button id="start-demo" class="primary">Start demonstration</button><button id="replay-demo" class="secondary" hidden>Replay</button><button id="continue" class="primary" disabled>Continue</button></div>`);
-  const video = document.querySelector('#demo-video');
-  const demoAudio = new Audio('assets/audio/11_demo.wav');
-  demoAudio.preload = 'auto';
-  const status = document.querySelector('#demo-status');
-  const start = document.querySelector('#start-demo');
-  const replay = document.querySelector('#replay-demo');
-  const continueButton = document.querySelector('#continue');
-  video.addEventListener('ended', () => {
-    demoAudio.pause();
-    demoAudio.currentTime = 0;
-    status.textContent = 'Demonstration finished.';
-    replay.hidden = false;
-    replay.disabled = false;
-    continueButton.disabled = false;
-  });
-  const playDemo = () => {
-    start.disabled = true;
-    replay.disabled = true;
-    video.currentTime = 0;
-    demoAudio.currentTime = 0;
-    Promise.all([video.play(), demoAudio.play()])
-      .then(() => { status.textContent = 'Demonstration playing.'; })
-      .catch(() => {
-        status.textContent = 'The demonstration could not start. Use the video controls to try again.';
-        replay.disabled = false;
-        video.controls = true;
-      });
-  };
-  start.addEventListener('click', playDemo, { once: true });
-  replay.addEventListener('click', playDemo);
+  render(`<h2>Example round</h2>
+    <p class="instruction-body">Suppose you allocate £600 to your personal payment and £400 to the Temporary Shelter Fund. You would then predict whether the service considers £400 fair, rate your confidence, and see its feedback.</p>
+    <div class="allocation" aria-label="Example allocation: personal payment £600; recovery support £400.">
+      <span class="allocation-labels"><span>PERSONAL PAYMENT</span><span>RECOVERY SUPPORT</span></span>
+      <span class="allocation-amounts"><span>£600</span><span>£400</span></span>
+      <span class="allocation-bar" aria-hidden="true"><span class="allocation-keep" style="width: 60%"></span><span class="allocation-give" style="width: 40%"></span></span>
+    </div>
+    <p class="instruction-body">If the feedback is negative, you can add £300 to the same recipient, contribute £300 to wider recovery support, or make no change. An added contribution reduces your personal payment by £300.</p>
+    <div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
-  stopNarration();
-  video.pause();
-  demoAudio.pause();
 }
 
 function buildTargets() {
@@ -332,14 +259,14 @@ function buildTrials() {
 }
 
 function initialiseHiddenTargets() {
-  const youthLenient = Math.random() < 0.5;
-  const johnYouth = Math.random() < 0.5;
+  const shelterLenient = Math.random() < 0.5;
+  const morganShelter = Math.random() < 0.5;
   return {
     groups: {
-      youth: { threshold: youthLenient ? 0.3 : 0.7, assignment: youthLenient ? 'lenient' : 'strict' },
-      sports: { threshold: youthLenient ? 0.7 : 0.3, assignment: youthLenient ? 'strict' : 'lenient' },
+      shelter: { threshold: shelterLenient ? 0.3 : 0.7, assignment: shelterLenient ? 'lenient' : 'strict' },
+      essentials: { threshold: shelterLenient ? 0.7 : 0.3, assignment: shelterLenient ? 'strict' : 'lenient' },
     },
-    individuals: { john: johnYouth ? 'youth' : 'sports', julia: johnYouth ? 'sports' : 'youth' },
+    individuals: { morgan: morganShelter ? 'shelter' : 'essentials', rowan: morganShelter ? 'essentials' : 'shelter' },
   };
 }
 
@@ -359,20 +286,20 @@ function feedbackFor(trial, choice, hidden) {
 
 function targetCard(trial) {
   const theme = trial.type === 'group' ? 'teal' : 'amber';
-  return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${trial.type === 'group' ? 'Group' : 'Individual'}: ${escapeHtml(trial.name)}</h3><p>${escapeHtml(trial.description)}</p></aside>`;
+  return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${trial.type === 'group' ? 'Recovery service' : 'Affected resident'}: ${escapeHtml(trial.name)}</h3><p>${escapeHtml(trial.description)}</p></aside>`;
 }
 
 async function chooseAllocation(trial, balance) {
   const choices = trial.split_options.map((option) => {
     const keepPercentage = (option.self_amount / STARTING_BALANCE) * 100;
     const givePercentage = (option.target_amount / STARTING_BALANCE) * 100;
-    return `<button class="choice allocation" data-value="${option.id}" aria-label="Keep £${option.self_amount}; give £${option.target_amount}">
-      <span class="allocation-labels"><span>KEEP</span><span>GIVE</span></span>
+    return `<button class="choice allocation" data-value="${option.id}" aria-label="Personal payment £${option.self_amount}; recovery support £${option.target_amount}">
+      <span class="allocation-labels"><span>PERSONAL PAYMENT</span><span>RECOVERY SUPPORT</span></span>
       <span class="allocation-amounts"><span>£${option.self_amount}</span><span>£${option.target_amount}</span></span>
       <span class="allocation-bar" aria-hidden="true"><span class="allocation-keep" style="width: ${keepPercentage}%"></span><span class="allocation-give" style="width: ${givePercentage}%"></span></span>
     </button>`;
   }).join('');
-  renderTask(`<div class="trial-grid"><div class="choices">${choices}</div><div class="recipient-panel"><p class="recipient-label">Recipient</p>${targetCard(trial)}</div></div>`);
+  renderTask(`<div class="trial-grid"><div class="choices">${choices}</div><div class="recipient-panel"><p class="recipient-label">Recovery recipient</p>${targetCard(trial)}</div></div>`);
   const onset = nowSeconds();
   const selectedId = Number(await waitForSelection('.allocation'));
   return { choice: trial.split_options.find((option) => option.id === selectedId), responseTime: nowSeconds() - onset };
@@ -380,8 +307,8 @@ async function chooseAllocation(trial, balance) {
 
 async function choosePrediction(trial) {
   const question = trial.type === 'group'
-    ? `Do the ${trial.name} representatives think your decision was socially appropriate?`
-    : `Does ${trial.name} think your decision treated them fairly?`;
+    ? `Do the ${trial.name} representatives think your allocation provided fair recovery support?`
+    : `Does ${trial.name} think your allocation treated their recovery needs fairly?`;
   renderTask(`<h2>${question}</h2><div class="prediction-target">${targetCard(trial)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">YES</button><button class="primary prediction" data-value="disapprove">NO</button></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
@@ -397,16 +324,16 @@ async function chooseConfidence() {
 }
 
 async function fetchingEvaluation() {
-  renderTask('<p class="fetching">The evaluation is being considered…</p>');
+  renderTask('<p class="fetching">The recovery feedback is being considered…</p>');
   await new Promise((resolve) => window.setTimeout(resolve, 1500));
 }
 
 async function showFeedback(trial, feedback) {
   const isGroup = trial.type === 'group';
   const message = isGroup
-    ? (feedback.approved ? `The ${trial.name} representatives decided that your decision was in line with their community norms.` : `The ${trial.name} representatives decided your decision violated their community norms.`)
-    : (feedback.approved ? `${trial.name} decided they were treated fairly.` : `${trial.name} decided that your decision treated them unfairly.`);
-  const visibility = isGroup ? 'This decision will appear on your committee record.' : `This decision will only be visible to yourself and ${trial.name}.`;
+    ? (feedback.approved ? `The ${trial.name} representatives judged that your allocation met their standard for fair recovery support.` : `The ${trial.name} representatives judged that your allocation did not meet their standard for fair recovery support.`)
+    : (feedback.approved ? `${trial.name} judged that the allocation treated their recovery needs fairly.` : `${trial.name} judged that the allocation did not meet their immediate recovery needs and felt unfairly treated.`);
+  const visibility = isGroup ? 'This service decision will appear on your recovery accountability record.' : `This resident decision will only be visible to you and ${trial.name}.`;
   renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div><p>${visibility}</p><div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
 }
@@ -453,9 +380,9 @@ async function emotionProbe() {
 
 async function chooseRepair(trial) {
   const targetRepairLabel = trial.type === 'individual'
-    ? `Add £${REPAIR_AMOUNT} to ${escapeHtml(trial.name)}’s salary`
+    ? `Add £${REPAIR_AMOUNT} to ${escapeHtml(trial.name)}’s recovery support`
     : `Add £${REPAIR_AMOUNT} to the ${escapeHtml(trial.name)}`;
-  renderTask(`<h2>What would you like to do?</h2><p>Giving money costs £${REPAIR_AMOUNT} from your salary.</p><div class="vertical-choices"><button class="primary repair" data-value="target">${targetRepairLabel}</button><button class="primary repair" data-value="community">Give £${REPAIR_AMOUNT} to future community projects</button><button class="primary repair" data-value="none">Do nothing</button></div>`);
+  renderTask(`<h2>Would you like to revise the support?</h2><p>An added £${REPAIR_AMOUNT} contribution reduces your personal payment by £${REPAIR_AMOUNT}.</p><div class="vertical-choices"><button class="primary repair" data-value="target">${targetRepairLabel}</button><button class="primary repair" data-value="community">Contribute £${REPAIR_AMOUNT} to wider recovery support</button><button class="primary repair" data-value="none">Make no change</button></div>`);
   const onset = nowSeconds();
   const repairChoice = await waitForSelection('.repair');
   return { repairChoice, responseTime: nowSeconds() - onset };
@@ -555,7 +482,7 @@ async function pilotChecks() {
 }
 
 async function ethicalDebrief() {
-  await showInstruction('About this study', `The social feedback in this task was simulated and generated by the study’s programmed procedure. No person, group, or committee member judged any of your decisions.\n\nNothing in this task reflects your worth, character, or real behaviour.\n\nThis study examines how people respond to perceived social evaluation and to decisions about allocating resources. The statement that your public record would be reviewed for a bonus was a motivational framing element. Your decisions were not reviewed by members of a virtual committee.\n\nThank you for taking part. Your contribution is useful for helping researchers understand these processes.`);
+  await showInstruction('About this study', `The social feedback in this task was simulated and generated by the study’s programmed procedure. No recovery service, resident, or other person judged any of your decisions.\n\nNothing in this task reflects your worth, character, or real behaviour.\n\nThe storm-recovery setting, recipients, and feedback were fictional. This study examines how people respond to perceived social evaluation and to decisions about allocating resources. The statement that your accountability record would be reviewed for a bonus was a motivational framing element.\n\nThank you for taking part. Your contribution is useful for helping researchers understand these processes.`);
   await showInstruction('Your data and study contacts', `You may request withdrawal of your data by [INSERT APPROVED WITHDRAWAL DEADLINE].\n\nTo do so, contact: [INSERT WITHDRAWAL CONTACT EMAIL]\n[INSERT APPROVED WITHDRAWAL PROCEDURE, INCLUDING ANY PARTICIPANT ID OR STUDY REFERENCE.]\n\nResearcher: [INSERT RESEARCHER NAME AND EMAIL]\nSupervisor: [INSERT SUPERVISOR NAME AND EMAIL]\n\nFor concerns or complaints about the study or your participant rights:\n[INSERT ETHICS-COMPLAINTS CONTACT DETAILS]`);
   await showInstruction('Before you leave', `If any part of this task has left you feeling unsettled, take a moment to notice your surroundings and return your attention to your day at your own pace.\n\nYou may wish to speak with someone you trust or use a support service.\n\nUK and Republic of Ireland: Samaritans — call 116 123, free, 24 hours a day. In England, for urgent mental-health support, call NHS 111 and select the mental-health option. In an emergency or if anyone is in immediate danger, call 999 or go to A&E.\n\nThank you again for your time and contribution.`);
 }
@@ -587,18 +514,18 @@ async function finishExperiment() {
 }
 
 async function runExperiment() {
-  await showInstruction('Community Committee', '', 'assets/audio/01_community_committee.wav', INTRO_DIAGRAMS.committee);
-  await showInstruction('Who will receive funds?', '', 'assets/audio/02_recipients.wav', INTRO_DIAGRAMS.salary);
-  await showProfiles('Community Groups', '', GROUPS, 'teal', 'assets/audio/03_community_groups.wav');
-  await showProfiles('Individual Committee Members', '', INDIVIDUALS, 'amber', 'assets/audio/04_individual_members.wav');
-  await showInstruction('How evaluations work', '', 'assets/audio/05_how_evaluations_work.wav', INTRO_DIAGRAMS.evaluations);
-  await showInstruction('How each trial works', '', 'assets/audio/06_round_sequence.wav', INTRO_DIAGRAMS.trialFlow);
-  await showInstruction('Public vs. private decisions', '', 'assets/audio/07_public_private.wav', INTRO_DIAGRAMS.visibility);
-  await showInstruction('Your bonus', '', 'assets/audio/08_bonus.wav', INTRO_DIAGRAMS.bonus);
-  await showInstruction('Monitoring your progress', '', 'assets/audio/09_monitoring_progress.wav', INTRO_DIAGRAMS.progress);
-  await showInstruction('Demonstration — before you begin', 'You will now see an example round.');
+  await showInstruction('Storm recovery response', 'A severe storm has disrupted a fictional town. You are a temporary recovery coordinator who allocates a fixed £1,000 recovery budget on each round.\n\nEvery amount added to your personal payment leaves less available for immediate recovery support.', INTRO_DIAGRAMS.committee);
+  await showInstruction('Who will receive recovery support?', 'Some rounds support a recovery service; other rounds support an individual resident affected by the storm. In every round, you divide the £1,000 budget between your personal payment and that recipient.', INTRO_DIAGRAMS.salary);
+  await showProfiles('Recovery services', 'Service representatives assess whether allocations meet their standard for fair recovery support.', GROUPS, 'teal');
+  await showProfiles('Affected residents', 'Each resident is connected to one—and only one—recovery service through their involvement in the recovery response. Connected residents and services tend to use similar standards when judging whether allocations are fair.\n\nYou will not be told which resident is connected to which service. Use the feedback you receive to form your view of the two connections. Because feedback is probabilistic, connected evaluators may not always respond identically.', INDIVIDUALS, 'amber');
+  await showInstruction('How feedback works', 'Recovery services assess whether an allocation provides fair support. Residents assess whether an allocation treats their recovery needs fairly.\n\nYour task is to predict each response, including the hidden resident–service connections.', INTRO_DIAGRAMS.evaluations);
+  await showInstruction('How each round works', 'Choose an allocation, predict the recipient’s response, rate your confidence, and then see feedback. After negative feedback, you can choose whether to revise the support.\n\nOccasionally you will also rate how you feel.', INTRO_DIAGRAMS.trialFlow);
+  await showInstruction('Public and private decisions', 'Service decisions are public and update your recovery accountability record. Resident decisions are private and visible only to you and the resident.', INTRO_DIAGRAMS.visibility);
+  await showInstruction('Your potential final payment', 'Money allocated to your personal payment is added to your personal fund. Revising support reduces that fund. Your public recovery accountability record also contributes to a potential final payment.', INTRO_DIAGRAMS.bonus);
+  await showInstruction('Monitoring your progress', 'Your personal payment, payment status, and recovery accountability record remain visible throughout the task.', INTRO_DIAGRAMS.progress);
+  await showInstruction('Example — before you begin', 'You will now see an example of the decision and feedback sequence.');
   await showDemo();
-  await showInstruction('Ready to begin', 'You will now begin the experiment.\n\nPlease respond as you genuinely would. There are no right or wrong answers.', 'assets/audio/12_ready_to_begin.wav', INTRO_DIAGRAMS.ready);
+  await showInstruction('Ready to begin', 'You will now begin the recovery-allocation task. Please respond as you genuinely would. There are no right or wrong answers.', INTRO_DIAGRAMS.ready);
   await runTrials();
   if (PILOT) await pilotChecks();
   await ethicalDebrief();
@@ -610,19 +537,10 @@ document.querySelector('#start-experiment').addEventListener('click', async () =
   startButton.disabled = true;
   participantId = document.querySelector('#participant-id').value.trim() || `anon_${Date.now()}`;
   expInfo = { participant: participantId, session: '001', date: new Date().toISOString(), expName: EXPERIMENT_NAME, version: VERSION };
-  // The explicit user gesture below is intentional: it unlocks browser audio
-  // playback before narrated instruction pages are presented.
-  audioUnlocker = new Audio('assets/audio/01_community_committee.wav');
-  audioUnlocker.muted = true;
-  audioUnlocker.play().then(() => {
-    audioUnlocker.pause();
-    audioUnlocker.currentTime = 0;
-  }).catch(() => {});
   try {
     await startPsychoJS();
     await runExperiment();
   } catch (error) {
-    stopNarration();
     render(`<h2>Unable to start the experiment</h2><p class="error">${escapeHtml(error?.message || error)}</p><p>Please reload the page. If this happens on Pavlovia, contact the researcher.</p>`);
   }
 });
