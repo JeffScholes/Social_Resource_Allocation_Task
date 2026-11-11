@@ -83,6 +83,7 @@ const app = document.querySelector('#app');
 const psychoJS = new PsychoJS({ debug: false });
 let expInfo = {};
 let participantId = '';
+let narration = null;
 let inputAllowedAfter = 0;
 let psychoJSStarted = false;
 let shamePool = [];
@@ -147,6 +148,48 @@ function renderTask(content, extraClass = '') {
   render(`${taskHeaderHtml()}${content}`, extraClass);
 }
 
+function stopNarration() {
+  if (narration) {
+    narration.pause();
+    narration.currentTime = 0;
+    narration = null;
+  }
+}
+
+function playNarration(path, statusNode = null) {
+  stopNarration();
+  narration = new Audio(path);
+  narration.preload = 'auto';
+  narration.addEventListener('ended', () => {
+    if (statusNode) statusNode.textContent = 'Narration finished.';
+  });
+  narration.play().then(() => {
+    if (statusNode) statusNode.textContent = 'Narration playing.';
+  }).catch(() => {
+    if (statusNode) statusNode.textContent = 'Narration is ready. Select “Play narration” if it did not start.';
+  });
+}
+
+function narrationControls(audioPath) {
+  if (!audioPath) return '';
+  return `<div class="actions"><button id="replay-audio" class="secondary">Play narration</button></div>
+    <p id="audio-status" class="audio-status">Narration starting…</p>`;
+}
+
+function attachReplay(audioPath) {
+  const replay = document.querySelector('#replay-audio');
+  const status = document.querySelector('#audio-status');
+  if (!replay || !status) return;
+  replay.addEventListener('click', () => playNarration(audioPath, status));
+}
+
+function startNarration(audioPath) {
+  if (!audioPath) return;
+  const status = document.querySelector('#audio-status');
+  playNarration(audioPath, status);
+  attachReplay(audioPath);
+}
+
 function waitForButton(selector) {
   const button = document.querySelector(selector);
   return new Promise((resolve) => {
@@ -198,20 +241,22 @@ async function startPsychoJS() {
   psychoJSStarted = true;
 }
 
-function instructionHtml(title, body, diagram = '') {
+function instructionHtml(title, body, diagram = '', audioPath = null) {
   const instructionContent = diagram
     ? `<div class="instruction-layout${body ? '' : ' diagram-only'}">${body ? `<p class="instruction-body">${body}</p>` : ''}${diagram}</div>`
     : `<p class="instruction-body">${body}</p>`;
-  return `<h2>${title}</h2>${instructionContent}
+  return `<h2>${title}</h2>${instructionContent}${narrationControls(audioPath)}
     <div class="actions"><button id="continue" class="primary">Continue</button></div>`;
 }
 
-async function showInstruction(title, body, diagram = '') {
-  render(instructionHtml(title, body, diagram));
+async function showInstruction(title, body, diagram = '', audioPath = null) {
+  render(instructionHtml(title, body, diagram, audioPath));
+  startNarration(audioPath);
   await waitForButton('#continue');
+  stopNarration();
 }
 
-async function showProfiles(title, subtitle, targets, theme) {
+async function showProfiles(title, subtitle, targets, theme, audioPath = null) {
   const cards = targets.map((target) => `
     <article class="profile ${theme}">
       <img src="${target.image}" alt="${escapeHtml(target.name)}">
@@ -221,8 +266,11 @@ async function showProfiles(title, subtitle, targets, theme) {
   const subtitleHtml = subtitle ? `<p class="instruction-body">${subtitle}</p>` : '';
   render(`<h2>${title}</h2>${subtitleHtml}
     <div class="profiles">${cards}</div>
+    ${narrationControls(audioPath)}
     <div class="actions"><button id="continue" class="primary">Continue</button></div>`);
+  startNarration(audioPath);
   await waitForButton('#continue');
+  stopNarration();
 }
 
 async function showDemo() {
@@ -514,18 +562,18 @@ async function finishExperiment() {
 }
 
 async function runExperiment() {
-  await showInstruction('Storm recovery response', 'A severe storm has disrupted a fictional town. You are a temporary recovery coordinator who allocates a fixed £1,000 recovery budget on each round.\n\nEvery amount added to your personal payment leaves less available for immediate recovery support.', INTRO_DIAGRAMS.committee);
-  await showInstruction('Who will receive recovery support?', 'Some rounds support a recovery service; other rounds support an individual resident affected by the storm. In every round, you divide the £1,000 budget between your personal payment and that recipient.', INTRO_DIAGRAMS.salary);
-  await showProfiles('Recovery services', 'Service representatives assess whether allocations meet their standard for fair recovery support.', GROUPS, 'teal');
-  await showProfiles('Affected residents', 'Each resident is connected to one—and only one—recovery service through their involvement in the recovery response. Connected residents and services tend to use similar standards when judging whether allocations are fair.\n\nYou will not be told which resident is connected to which service. Use the feedback you receive to form your view of the two connections. Because feedback is probabilistic, connected evaluators may not always respond identically.', INDIVIDUALS, 'amber');
-  await showInstruction('How feedback works', 'Recovery services assess whether an allocation provides fair support. Residents assess whether an allocation treats their recovery needs fairly.\n\nYour task is to predict each response, including the hidden resident–service connections.', INTRO_DIAGRAMS.evaluations);
-  await showInstruction('How each round works', 'Choose an allocation, predict the recipient’s response, rate your confidence, and then see feedback. After negative feedback, you can choose whether to revise the support.\n\nOccasionally you will also rate how you feel.', INTRO_DIAGRAMS.trialFlow);
-  await showInstruction('Public and private decisions', 'Service decisions are public and update your recovery accountability record. Resident decisions are private and visible only to you and the resident.', INTRO_DIAGRAMS.visibility);
-  await showInstruction('Your potential final payment', 'Money allocated to your personal payment is added to your personal fund. Revising support reduces that fund. Your public recovery accountability record also contributes to a potential final payment.', INTRO_DIAGRAMS.bonus);
-  await showInstruction('Monitoring your progress', 'Your personal payment, payment status, and recovery accountability record remain visible throughout the task.', INTRO_DIAGRAMS.progress);
-  await showInstruction('Example — before you begin', 'You will now see an example of the decision and feedback sequence.');
+  await showInstruction('Disaster recovery response', '', INTRO_DIAGRAMS.committee, 'assets/audio/01.wav');
+  await showInstruction('Who will receive disaster support?', '', INTRO_DIAGRAMS.salary, 'assets/audio/02.wav');
+  await showProfiles('Recovery services', '', GROUPS, 'teal', 'assets/audio/03.wav');
+  await showProfiles('Affected residents', '', INDIVIDUALS, 'amber', 'assets/audio/04.wav');
+  await showInstruction('How feedback works', '', INTRO_DIAGRAMS.evaluations, 'assets/audio/05.wav');
+  await showInstruction('How each round works', '', INTRO_DIAGRAMS.trialFlow, 'assets/audio/06.wav');
+  await showInstruction('Public and private decisions', '', INTRO_DIAGRAMS.visibility, 'assets/audio/07.wav');
+  await showInstruction('Your potential final payment', '', INTRO_DIAGRAMS.bonus, 'assets/audio/08.wav');
+  await showInstruction('Monitoring your progress', '', INTRO_DIAGRAMS.progress, 'assets/audio/09.wav');
+  await showInstruction('Example — before you begin', 'You will now see an example of the decision and feedback sequence.', '', 'assets/audio/10.wav');
   await showDemo();
-  await showInstruction('Ready to begin', 'You will now begin the recovery-allocation task. Please respond as you genuinely would. There are no right or wrong answers.', INTRO_DIAGRAMS.ready);
+  await showInstruction('Ready to begin', '', INTRO_DIAGRAMS.ready, 'assets/audio/12.wav');
   await runTrials();
   if (PILOT) await pilotChecks();
   await ethicalDebrief();

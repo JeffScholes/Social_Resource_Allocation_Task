@@ -12,9 +12,10 @@ resident--service connections are deliberately not shown: participants infer
 them from the feedback they receive.
 
 All recipients, feedback, and accountability consequences are simulated. The
-task includes an explicit debrief explaining this. Instructional material is
-presented on screen; the original narration and demonstration video are not
-used in this version.
+task includes an explicit debrief explaining this. Introduction screens 1--10
+and 12 present on-screen text with matching narration in `assets/audio/`; the
+screen-11 example remains on screen only until its demonstration video is
+added.
 
 For GitHub Pages pre-pilots, this folder uses its own pinned PsychoJS runtime
 under `lib/`. Results are downloaded as a CSV for the participant to return
