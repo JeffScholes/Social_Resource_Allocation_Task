@@ -3,9 +3,10 @@
  * The interface is intentionally browser-native, while PsychoJS manages the
  * Pavlovia session and writes the data rows at the end of each trial.
  */
-import { core, util } from './lib/psychojs-2024.1.0.js';
+import { core, data, util } from './lib/psychojs-2024.1.0.js';
 
 const { PsychoJS } = core;
+const { ExperimentHandler } = data;
 const { Scheduler } = util;
 
 const EXPERIMENT_NAME = 'Storm_Recovery_Resource_Allocation_Task';
@@ -522,11 +523,11 @@ async function finishExperiment() {
   try {
     psychoJS.experiment.experimentEnded = true;
     psychoJS._scheduler.stop();
-    if (psychoJS.getEnvironment() === PsychoJS.Environment.SERVER) {
+    if (psychoJS.getEnvironment() === ExperimentHandler.Environment.SERVER) {
       window.removeEventListener('beforeunload', psychoJS.beforeunloadCallback);
     }
     await psychoJS.experiment.save();
-    if (psychoJS.getEnvironment() === PsychoJS.Environment.SERVER) {
+    if (psychoJS.getEnvironment() === ExperimentHandler.Environment.SERVER) {
       await psychoJS.serverManager.closeSession(true);
     }
     render('<h2>Thank you</h2><p>Your responses have been submitted successfully. You may now close this page.</p>');
