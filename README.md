@@ -18,6 +18,14 @@ before the experiment starts, so narrated instruction audio is permitted by
 modern browser autoplay rules. The narration for each screen starts from the
 participant's click to enter that screen; a replay button is available.
 
+## GitHub Pages pre-pilots
+
+This repository includes a pinned local PsychoJS runtime under `lib/`; do not
+replace it with an unversioned `pavlovia.org/lib` URL. When the task is hosted
+on GitHub Pages, PsychoJS treats it as a local experiment and downloads the
+results as a CSV at completion. Participants must return that downloaded CSV
+using the study's approved procedure.
+
 ## Important implementation notes
 
 - The experiment uses PsychoJS for Pavlovia session handling and data saving,

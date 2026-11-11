@@ -3,9 +3,10 @@
  * The interface is intentionally browser-native, while PsychoJS manages the
  * Pavlovia session and writes the data rows at the end of each trial.
  */
-import { PsychoJS } from 'https://pavlovia.org/lib/core.js';
-import { Scheduler } from 'https://pavlovia.org/lib/util.js';
-import * as util from 'https://pavlovia.org/lib/util.js';
+import { core, util } from './lib/psychojs-2024.1.0.js';
+
+const { PsychoJS } = core;
+const { Scheduler } = util;
 
 const EXPERIMENT_NAME = 'Social_Resource_Allocation_Task';
 const VERSION = '1.7';

@@ -19,16 +19,9 @@
         <p class="muted">Use headphones if possible. This button enables the narrated instructions in your browser.</p>
       </section>
     </main>
-    <!-- Dependencies required by the hand-coded PsychoJS runtime. -->
-    <script src="jquery.min.js"></script>
-    <script src="jquery-ui.min.js"></script>
-    <script src="jquery.blockUI.js"></script>
-    <script src="log4javascript.js"></script>
+    <!-- PsychoJS uses CreateJS/PreloadJS for its resource queue. -->
     <script src="preloadjs.min.js"></script>
-    <script src="howler.min.js"></script>
-    <script src="pixi.min.js"></script>
-    <!-- PsychoJS uses SheetJS to build CSV files for pilot downloads and results uploads. -->
-    <script src="xlsx.full.min.js"></script>
+    <!-- The locally vendored PsychoJS module includes its remaining runtime dependencies. -->
     <script type="module" src="experiment.js"></script>
   </body>
 </html>
