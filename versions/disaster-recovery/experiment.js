@@ -120,10 +120,13 @@ function taskHeaderHtml() {
     publicDecisionsReviewed,
     approvedPublicDecisions,
     salaryStatus,
+    currentTrialType,
   } = taskStatus;
-  const recordDisplay = publicDecisionsReviewed === 0
-    ? '<p class="record-empty">No public service decisions reviewed yet</p>'
-    : `<div class="record-meter" role="progressbar" aria-label="Recovery accountability record: ${approvedPublicDecisions} approved public service decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`;
+  const recordDisplay = currentTrialType === 'individual'
+    ? '<p class="record-private">N/A — private individual trial</p>'
+    : (publicDecisionsReviewed === 0
+      ? '<p class="record-empty">No public service decisions reviewed yet</p>'
+      : `<div class="record-meter" role="progressbar" aria-label="Recovery accountability record: ${approvedPublicDecisions} approved public service decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`);
   return `<header class="task-header">
     <section class="task-status-card"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong></section>
     <section class="task-status-card salary-status"><span class="task-status-label">Payment status</span><strong>${escapeHtml(salaryStatus)}</strong></section>
@@ -428,8 +431,10 @@ async function runTrials() {
     salaryStatus: 'On track',
     expectedSalary: STARTING_BALANCE,
     salaryStatusUpdated: false,
+    currentTrialType: '',
   };
   for (const trial of trials) {
+    taskStatus.currentTrialType = trial.type;
     const allocation = await chooseAllocation(trial, balance);
     const prediction = await choosePrediction(trial);
     const confidence = await chooseConfidence();
