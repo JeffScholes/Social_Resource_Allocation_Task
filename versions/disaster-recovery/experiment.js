@@ -14,6 +14,8 @@ const VERSION = '0.1.0';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
+const ALLOCATION_STEP = 100;
+const DEFAULT_RECIPIENT_SUPPORT = 500;
 // Provisional monitoring parameters. These can be optimised later when the
 // final trial count and decision model are set using BOED.
 const SALARY_STATUS_CHECK_INTERVAL = 3;
@@ -29,12 +31,6 @@ const GROUPS = [
 const INDIVIDUALS = [
   { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/john_smith.png' },
   { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/julia_hart.png' },
-];
-const SPLIT_OPTIONS = [
-  { id: 1, self_amount: 700, target_amount: 300 },
-  { id: 2, self_amount: 600, target_amount: 400 },
-  { id: 3, self_amount: 500, target_amount: 500 },
-  { id: 4, self_amount: 400, target_amount: 600 },
 ];
 const INTRO_DIAGRAMS = {
   committee: `<div class="instruction-diagram committee-diagram" role="img" aria-label="You are a temporary recovery coordinator who decides how a £1,000 storm-recovery budget is divided.">
@@ -292,7 +288,6 @@ function buildTrials() {
   return shuffle(design).map((target, index) => ({
     ...target,
     trial_num: index + 1,
-    split_options: shuffle(SPLIT_OPTIONS).map((option) => ({ ...option, generosity: option.target_amount / STARTING_BALANCE })),
   }));
 }
 
@@ -327,20 +322,39 @@ function targetCard(trial) {
   return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3><p>${escapeHtml(trial.description)}</p></aside>`;
 }
 
-async function chooseAllocation(trial, balance) {
-  const choices = trial.split_options.map((option) => {
-    const keepPercentage = (option.self_amount / STARTING_BALANCE) * 100;
-    const givePercentage = (option.target_amount / STARTING_BALANCE) * 100;
-    return `<button class="choice allocation" data-value="${option.id}" aria-label="Personal payment £${option.self_amount}; recovery support £${option.target_amount}">
-      <span class="allocation-labels"><span>PERSONAL PAYMENT</span><span>RECOVERY SUPPORT</span></span>
-      <span class="allocation-amounts"><span>£${option.self_amount}</span><span>£${option.target_amount}</span></span>
-      <span class="allocation-bar" aria-hidden="true"><span class="allocation-keep" style="width: ${keepPercentage}%"></span><span class="allocation-give" style="width: ${givePercentage}%"></span></span>
-    </button>`;
-  }).join('');
-  renderTask(`<div class="trial-grid"><div class="choices">${choices}</div><div class="recipient-panel"><p class="recipient-label">Recovery recipient</p>${targetCard(trial)}</div></div>`);
+async function chooseAllocation(trial) {
+  renderTask(`<div class="trial-grid"><div class="allocation-control">
+    <div class="allocation-values" aria-live="polite">
+      <section><span>PERSONAL PAYMENT</span><strong id="self-amount">£${STARTING_BALANCE - DEFAULT_RECIPIENT_SUPPORT}</strong></section>
+      <section><span>RECOVERY SUPPORT</span><strong id="target-amount">£${DEFAULT_RECIPIENT_SUPPORT}</strong></section>
+    </div>
+    <label class="visually-hidden" for="allocation-slider">Allocate funds between your personal payment and recovery support</label>
+    <input id="allocation-slider" class="allocation-slider" type="range" min="0" max="${STARTING_BALANCE}" step="${ALLOCATION_STEP}" value="${DEFAULT_RECIPIENT_SUPPORT}" aria-valuetext="Personal payment £${STARTING_BALANCE - DEFAULT_RECIPIENT_SUPPORT}; recovery support £${DEFAULT_RECIPIENT_SUPPORT}">
+    <div class="allocation-endpoints muted" aria-hidden="true"><span>Keep everything<br>£1,000 / £0</span><span>Give everything<br>£0 / £1,000</span></div>
+    <div class="actions"><button id="confirm-allocation" class="primary">Confirm allocation</button></div>
+  </div><div class="recipient-panel"><p class="recipient-label">Recovery recipient</p>${targetCard(trial)}</div></div>`);
   const onset = nowSeconds();
-  const selectedId = Number(await waitForSelection('.allocation'));
-  return { choice: trial.split_options.find((option) => option.id === selectedId), responseTime: nowSeconds() - onset };
+  const slider = document.querySelector('#allocation-slider');
+  const selfAmount = document.querySelector('#self-amount');
+  const targetAmount = document.querySelector('#target-amount');
+  const updateAmounts = () => {
+    const target = Number(slider.value);
+    const self = STARTING_BALANCE - target;
+    selfAmount.textContent = `£${self}`;
+    targetAmount.textContent = `£${target}`;
+    slider.setAttribute('aria-valuetext', `Personal payment £${self}; recovery support £${target}`);
+  };
+  slider.addEventListener('input', updateAmounts);
+  await waitForButton('#confirm-allocation');
+  const target = Number(slider.value);
+  return {
+    choice: {
+      self_amount: STARTING_BALANCE - target,
+      target_amount: target,
+      generosity: target / STARTING_BALANCE,
+    },
+    responseTime: nowSeconds() - onset,
+  };
 }
 
 async function choosePrediction(trial) {
@@ -435,7 +449,7 @@ async function runTrials() {
   };
   for (const trial of trials) {
     taskStatus.currentTrialType = trial.type;
-    const allocation = await chooseAllocation(trial, balance);
+    const allocation = await chooseAllocation(trial);
     const prediction = await choosePrediction(trial);
     const confidence = await chooseConfidence();
     const feedback = feedbackFor(trial, allocation.choice, hidden);
