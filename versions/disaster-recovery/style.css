@@ -133,6 +133,10 @@ label { display: block; text-align: left; font-weight: 700; }
 .record-private { color: #c9c9c9; font-weight: 700; }
 .record-meter { position: relative; height: 18px; margin-top: 8px; border: 1px solid #e5e5e5; border-radius: 999px; background: linear-gradient(90deg, #c83b3b 0%, #e8b93e 50%, #45a95a 100%); }
 .record-marker { position: absolute; top: 50%; width: 22px; height: 22px; transform: translate(-50%, -50%); border: 3px solid #fff; border-radius: 50%; background: #171717; box-shadow: 0 0 0 1px #000; transition: left .35s ease-out; }
+.community-record.record-approved { animation: record-approved-pulse 1.35s ease-out both; }
+.community-record.record-disapproved { animation: record-disapproved-pulse 1.35s ease-out both; }
+@keyframes record-approved-pulse { 0%, 100% { border-color: #707070; background: #252525; } 35% { border-color: #76dc8c; background: #25472e; box-shadow: 0 0 20px rgba(80, 205, 111, .65); } }
+@keyframes record-disapproved-pulse { 0%, 100% { border-color: #707070; background: #252525; } 35% { border-color: #ff7777; background: #522b2b; box-shadow: 0 0 20px rgba(232, 71, 71, .65); } }
 .trial-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(220px, .8fr); gap: 28px; align-items: center; }
 .recipient-label { margin: 0 0 8px; text-align: center; font-weight: 700; }
 .choices { display: grid; gap: 12px; }
@@ -159,6 +163,12 @@ label { display: block; text-align: left; font-weight: 700; }
 .fetching { font-size: 1.3rem; padding: 70px 0; }
 .feedback.good { color: #7fe57f; }
 .feedback.bad { color: #ff7777; }
+.accountability-update { width: min(620px, 100%); margin: 20px auto 0; padding: 13px 16px; border: 1px solid currentColor; border-radius: 8px; font-weight: 700; }
+.accountability-update.positive { color: #8aeb9b; background: rgba(67, 159, 83, .18); }
+.accountability-update.negative { color: #ff9696; background: rgba(200, 59, 59, .18); }
+@media (prefers-reduced-motion: reduce) {
+  .community-record.record-approved, .community-record.record-disapproved { animation: none; }
+}
 .decision-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
 .decision-row .primary { min-width: 200px; }
 .prediction-target { width: min(310px, 100%); margin: 22px auto 0; }

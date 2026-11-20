@@ -132,7 +132,9 @@ function taskHeaderHtml() {
     approvedPublicDecisions,
     salaryStatus,
     currentTrialType,
+    accountabilityUpdate,
   } = taskStatus;
+  const recordUpdateClass = accountabilityUpdate ? `record-${accountabilityUpdate}` : '';
   const recordDisplay = currentTrialType === 'individual'
     ? '<p class="record-private">N/A — private individual trial</p>'
     : (publicDecisionsReviewed === 0
@@ -141,7 +143,7 @@ function taskHeaderHtml() {
   return `<header class="task-header">
     <section class="task-status-card"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong></section>
     <section class="task-status-card salary-status"><span class="task-status-label">Payment status</span><strong>${escapeHtml(salaryStatus)}</strong></section>
-    <section class="task-status-card community-record"><span class="task-status-label">Accountability record</span>${recordDisplay}</section>
+    <section class="task-status-card community-record ${recordUpdateClass}"><span class="task-status-label">Accountability record</span>${recordDisplay}</section>
   </header>`;
 }
 
@@ -404,7 +406,10 @@ async function showFeedback(trial, feedback) {
     ? (feedback.approved ? `The ${trial.name} representatives judged that your allocation met their standards for fair disaster support.` : `The ${trial.name} representatives judged that your allocation did not meet their standards for fair disaster recovery support.`)
     : (feedback.approved ? `${trial.name} judged that your allocation treated their recovery needs fairly.` : `${trial.name} judged that your allocation did not treat their recovery needs fairly.`);
   const visibility = isGroup ? 'This service decision will appear on your recovery accountability record.' : `This resident decision will only be visible to you and ${trial.name}.`;
-  renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div><p>${visibility}</p><div class="actions"><button id="continue" class="primary">Continue</button></div>`);
+  const recordUpdate = isGroup
+    ? `<p class="accountability-update ${feedback.approved ? 'positive' : 'negative'}" role="status">This public service decision has ${feedback.approved ? 'improved' : 'negatively affected'} your recovery accountability record.</p>`
+    : '';
+  renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div><p>${visibility}</p>${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
 }
 
@@ -464,9 +469,11 @@ async function runTrials() {
     expectedSalary: STARTING_BALANCE,
     salaryStatusUpdated: false,
     currentTrialType: '',
+    accountabilityUpdate: '',
   };
   for (const trial of trials) {
     taskStatus.currentTrialType = trial.type;
+    taskStatus.accountabilityUpdate = '';
     const allocation = await chooseAllocation(trial);
     const prediction = await choosePrediction(trial);
     const confidence = await chooseConfidence();
@@ -477,6 +484,7 @@ async function runTrials() {
     if (trial.type === 'group') {
       taskStatus.publicDecisionsReviewed += 1;
       if (feedback.approved) taskStatus.approvedPublicDecisions += 1;
+      taskStatus.accountabilityUpdate = feedback.approved ? 'approved' : 'disapproved';
     }
     await showFeedback(trial, feedback);
     let emotion = null;
@@ -512,6 +520,7 @@ async function runTrials() {
       committee_salary_status: taskStatus.salaryStatus,
       committee_expected_salary: taskStatus.expectedSalary,
       salary_status_updated: taskStatus.salaryStatusUpdated,
+      accountability_record_update: trial.type === 'group' ? taskStatus.accountabilityUpdate : 'not_applicable_private_trial',
       allocation_response_time: allocation.responseTime,
       prediction_response_time: prediction.responseTime,
       confidence_response_time: confidence.responseTime,
