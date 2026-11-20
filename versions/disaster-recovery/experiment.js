@@ -14,12 +14,13 @@ const VERSION = '0.1.0';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
 const REPAIR_AMOUNT = 300;
-const ALLOCATION_STEP = 100;
-const DEFAULT_RECIPIENT_SUPPORT = 500;
+const GROUP_ALLOCATION_BUDGET = 1000;
+const GROUP_ALLOCATION_STEP = 100;
+const INDIVIDUAL_ALLOCATION_BUDGET = 100;
+const INDIVIDUAL_ALLOCATION_STEP = 10;
 // Provisional monitoring parameters. These can be optimised later when the
 // final trial count and decision model are set using BOED.
 const SALARY_STATUS_CHECK_INTERVAL = 3;
-const SALARY_EXPECTED_KEEP_PER_TRIAL = 500;
 const SALARY_STATUS_MARGIN = 150;
 const PILOT = true;
 const INPUT_GUARD_MS = 250;
@@ -40,8 +41,8 @@ const INTRO_DIAGRAMS = {
     <div class="diagram-arrow">↓</div>
     <div class="diagram-caption">Decide how it is allocated</div>
   </div>`,
-  salary: `<div class="instruction-diagram salary-diagram" role="img" aria-label="Individual rounds divide £1,000 between your personal payment and an affected resident's recovery support. Service rounds divide £1,000 between your personal payment and a recovery service.">
-    <div class="salary-row"><span class="diagram-row-label">RESIDENT ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><span class="diagram-plus">+</span><div class="diagram-card diagram-individual">RESIDENT SUPPORT</div></div></div>
+  salary: `<div class="instruction-diagram salary-diagram" role="img" aria-label="Individual rounds divide £100 between your personal payment and an affected resident's recovery support. Service rounds divide £1,000 between your personal payment and a recovery service.">
+    <div class="salary-row"><span class="diagram-row-label">RESIDENT ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£100</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><span class="diagram-plus">+</span><div class="diagram-card diagram-individual">RESIDENT SUPPORT</div></div></div>
     <div class="salary-row"><span class="diagram-row-label">SERVICE ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£1,000</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><span class="diagram-plus">+</span><div class="diagram-card diagram-group">RECOVERY SERVICE</div></div></div>
   </div>`,
   evaluations: `<div class="instruction-diagram evaluations-diagram" role="img" aria-label="Recovery services evaluate decisions against their fair-support standards. Affected residents evaluate whether their needs were treated fairly.">
@@ -92,8 +93,7 @@ function nowSeconds() {
   return performance.now() / 1000;
 }
 
-function salaryStatusFor(balance, completedTrials) {
-  const expectedSalary = STARTING_BALANCE + (completedTrials * SALARY_EXPECTED_KEEP_PER_TRIAL);
+function salaryStatusFor(balance, expectedSalary) {
   const difference = balance - expectedSalary;
   if (difference < -SALARY_STATUS_MARGIN) {
     return { status: 'Below expected', expectedSalary };
@@ -102,6 +102,21 @@ function salaryStatusFor(balance, completedTrials) {
     return { status: 'Secure', expectedSalary };
   }
   return { status: 'On track', expectedSalary };
+}
+
+function allocationSettingsFor(trial) {
+  const budget = trial.type === 'individual' ? INDIVIDUAL_ALLOCATION_BUDGET : GROUP_ALLOCATION_BUDGET;
+  return {
+    budget,
+    step: trial.type === 'individual' ? INDIVIDUAL_ALLOCATION_STEP : GROUP_ALLOCATION_STEP,
+    defaultRecipientSupport: budget / 2,
+  };
+}
+
+function expectedSalaryForTrials(trials, completedTrials) {
+  return STARTING_BALANCE + trials
+    .slice(0, completedTrials)
+    .reduce((total, trial) => total + (allocationSettingsFor(trial).budget / 2), 0);
 }
 
 function render(content, extraClass = '') {
@@ -323,14 +338,15 @@ function targetCard(trial) {
 }
 
 async function chooseAllocation(trial) {
+  const { budget, step, defaultRecipientSupport } = allocationSettingsFor(trial);
   renderTask(`<div class="trial-grid"><div class="allocation-control">
     <div class="allocation-values" aria-live="polite">
-      <section><span>PERSONAL PAYMENT</span><strong id="self-amount">£${STARTING_BALANCE - DEFAULT_RECIPIENT_SUPPORT}</strong></section>
-      <section><span>RECOVERY SUPPORT</span><strong id="target-amount">£${DEFAULT_RECIPIENT_SUPPORT}</strong></section>
+      <section><span>PERSONAL PAYMENT</span><strong id="self-amount">£${budget - defaultRecipientSupport}</strong></section>
+      <section><span>RECOVERY SUPPORT</span><strong id="target-amount">£${defaultRecipientSupport}</strong></section>
     </div>
     <label class="visually-hidden" for="allocation-slider">Allocate funds between your personal payment and recovery support</label>
-    <input id="allocation-slider" class="allocation-slider" type="range" min="0" max="${STARTING_BALANCE}" step="${ALLOCATION_STEP}" value="${DEFAULT_RECIPIENT_SUPPORT}" aria-valuetext="Personal payment £${STARTING_BALANCE - DEFAULT_RECIPIENT_SUPPORT}; recovery support £${DEFAULT_RECIPIENT_SUPPORT}">
-    <div class="allocation-endpoints muted" aria-hidden="true"><span>Keep everything<br>£1,000 / £0</span><span>Give everything<br>£0 / £1,000</span></div>
+    <input id="allocation-slider" class="allocation-slider" type="range" min="0" max="${budget}" step="${step}" value="${defaultRecipientSupport}" aria-valuetext="Personal payment £${budget - defaultRecipientSupport}; recovery support £${defaultRecipientSupport}">
+    <div class="allocation-endpoints muted" aria-hidden="true"><span>Keep everything</span><span>Give everything</span></div>
     <div class="actions"><button id="confirm-allocation" class="primary">Confirm allocation</button></div>
   </div><div class="recipient-panel"><p class="recipient-label">Recovery recipient</p>${targetCard(trial)}</div></div>`);
   const onset = nowSeconds();
@@ -339,7 +355,7 @@ async function chooseAllocation(trial) {
   const targetAmount = document.querySelector('#target-amount');
   const updateAmounts = () => {
     const target = Number(slider.value);
-    const self = STARTING_BALANCE - target;
+    const self = budget - target;
     selfAmount.textContent = `£${self}`;
     targetAmount.textContent = `£${target}`;
     slider.setAttribute('aria-valuetext', `Personal payment £${self}; recovery support £${target}`);
@@ -349,9 +365,11 @@ async function chooseAllocation(trial) {
   const target = Number(slider.value);
   return {
     choice: {
-      self_amount: STARTING_BALANCE - target,
+      self_amount: budget - target,
       target_amount: target,
-      generosity: target / STARTING_BALANCE,
+      generosity: target / budget,
+      allocation_budget: budget,
+      allocation_step: step,
     },
     responseTime: nowSeconds() - onset,
   };
@@ -472,7 +490,7 @@ async function runTrials() {
       }
     }
     if (trial.trial_num % SALARY_STATUS_CHECK_INTERVAL === 0 || trial.trial_num === trials.length) {
-      const salaryStatus = salaryStatusFor(balance, trial.trial_num);
+      const salaryStatus = salaryStatusFor(balance, expectedSalaryForTrials(trials, trial.trial_num));
       taskStatus.salaryStatus = salaryStatus.status;
       taskStatus.expectedSalary = salaryStatus.expectedSalary;
       taskStatus.salaryStatusUpdated = true;
@@ -488,6 +506,8 @@ async function runTrials() {
       self_amount: allocation.choice.self_amount,
       target_amount: allocation.choice.target_amount,
       generosity: allocation.choice.generosity,
+      allocation_budget: allocation.choice.allocation_budget,
+      allocation_step: allocation.choice.allocation_step,
       current_funds: balance,
       committee_salary_status: taskStatus.salaryStatus,
       committee_expected_salary: taskStatus.expectedSalary,
