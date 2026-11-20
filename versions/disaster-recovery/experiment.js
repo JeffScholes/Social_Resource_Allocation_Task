@@ -403,13 +403,13 @@ async function fetchingEvaluation() {
 async function showFeedback(trial, feedback) {
   const isGroup = trial.type === 'group';
   const message = isGroup
-    ? (feedback.approved ? `The ${trial.name} representatives judged that your allocation met their standards for fair disaster support.` : `The ${trial.name} representatives judged that your allocation did not meet their standards for fair disaster recovery support.`)
+    ? (feedback.approved ? `${trial.name} standards for fair disaster support met.` : `${trial.name} standards for fair support not met.`)
     : (feedback.approved ? `${trial.name} judged that your allocation treated their recovery needs fairly.` : `${trial.name} judged that your allocation did not treat their recovery needs fairly.`);
-  const visibility = isGroup ? 'This service decision will appear on your recovery accountability record.' : `This resident decision will only be visible to you and ${trial.name}.`;
+  const visibility = isGroup ? '' : `<p>This resident decision will only be visible to you and ${trial.name}.</p>`;
   const recordUpdate = isGroup
-    ? `<p class="accountability-update ${feedback.approved ? 'positive' : 'negative'}" role="status">This public service decision has ${feedback.approved ? 'improved' : 'negatively affected'} your recovery accountability record.</p>`
+    ? `<p class="accountability-update ${feedback.approved ? 'positive' : 'negative'}" role="status">This public service decision has ${feedback.approved ? 'improved' : 'negatively affected'} your accountability record.</p>`
     : '';
-  renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div><p>${visibility}</p>${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
+  renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div>${visibility}${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
 }
 
@@ -487,6 +487,7 @@ async function runTrials() {
       taskStatus.accountabilityUpdate = feedback.approved ? 'approved' : 'disapproved';
     }
     await showFeedback(trial, feedback);
+    taskStatus.accountabilityUpdate = '';
     let emotion = null;
     if (probeTrials.has(trial.trial_num)) emotion = await emotionProbe();
     let repair = { repairChoice: '', responseTime: '' };
@@ -520,7 +521,7 @@ async function runTrials() {
       committee_salary_status: taskStatus.salaryStatus,
       committee_expected_salary: taskStatus.expectedSalary,
       salary_status_updated: taskStatus.salaryStatusUpdated,
-      accountability_record_update: trial.type === 'group' ? taskStatus.accountabilityUpdate : 'not_applicable_private_trial',
+      accountability_record_update: trial.type === 'group' ? (feedback.approved ? 'approved' : 'disapproved') : 'not_applicable_private_trial',
       allocation_response_time: allocation.responseTime,
       prediction_response_time: prediction.responseTime,
       confidence_response_time: confidence.responseTime,
