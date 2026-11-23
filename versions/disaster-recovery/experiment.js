@@ -131,8 +131,8 @@ const INTRO_DIAGRAMS = {
   bonus: `<div class="instruction-diagram bonus-diagram" role="img" aria-label="Your personal payment and accountability record contribute to a potential final payment.">
     <div class="bonus-inputs"><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><div class="diagram-plus">+</div><div class="diagram-card diagram-record">ACCOUNTABILITY RECORD</div></div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-payment">POTENTIAL FINAL PAYMENT</div>
   </div>`,
-  progress: `<div class="instruction-diagram dashboard-diagram" role="img" aria-label="Task header showing your personal payment, payment status, and accountability record.">
-    <div class="dashboard-preview"><div class="dashboard-card"><span>Personal payment</span><strong>£3,400</strong></div><div class="dashboard-card"><span>Payment status</span><strong>On track</strong></div><div class="dashboard-card dashboard-record"><span>Accountability record</span><div class="mini-record"><span></span></div></div></div><p class="diagram-note">These indicators will remain visible throughout the task.</p>
+  progress: `<div class="instruction-diagram dashboard-diagram" role="img" aria-label="Task header showing your personal payment and payment status together, accountability record, and a visual recovery programme progress map.">
+    <div class="dashboard-preview"><div class="dashboard-card"><span>Personal payment</span><strong>£3,400</strong><small>Payment status: On track</small></div><div class="dashboard-card dashboard-record"><span>Accountability record</span><div class="mini-record"><span></span></div></div><div class="dashboard-card dashboard-programme"><img src="assets/images/recovery-stage-1.png" alt=""><div class="mini-record"><span></span></div></div></div><p class="diagram-note">These indicators will remain visible throughout the task.</p>
   </div>`,
   ready: `<div class="instruction-diagram ready-diagram" role="img" aria-label="You are ready to allocate £1,000, predict a response, and see feedback."><div class="flow-step">Allocate £1,000</div><b>→</b><div class="flow-step">Predict</div><b>→</b><div class="flow-step">See feedback</div></div>`,
 };
@@ -206,9 +206,21 @@ function recoveryProgressHtml() {
   </section>`;
 }
 
+function weatherMotifHtml() {
+  const rainDrops = Array.from({ length: 54 }, (_, index) => {
+    const left = (index * 19) % 101;
+    const top = (index * 37) % 96;
+    const length = 16 + ((index * 11) % 22);
+    const tilt = 8 + ((index * 7) % 12);
+    const opacity = 45 + ((index * 13) % 46);
+    return `<i class="rain-drop" style="--left:${left}%;--top:${top}%;--length:${length}px;--tilt:${tilt}deg;--drop-opacity:${opacity}%"></i>`;
+  }).join('');
+  return `<div class="weather-motif" aria-hidden="true"><span class="storm-cloud cloud-left"></span><span class="storm-cloud cloud-centre"></span><span class="storm-cloud cloud-right"></span><span class="fair-cloud fair-cloud-left"></span><span class="fair-cloud fair-cloud-right"></span><span class="rain-field">${rainDrops}</span></div>`;
+}
+
 function render(content, extraClass = '') {
   if (!taskStatus) delete app.dataset.recoveryStage;
-  const weatherMotif = taskStatus ? '<div class="weather-motif" aria-hidden="true"><span class="storm-cloud cloud-left"></span><span class="storm-cloud cloud-right"></span></div>' : '';
+  const weatherMotif = taskStatus ? weatherMotifHtml() : '';
   app.innerHTML = `${weatherMotif}<section class="panel ${extraClass}">${content}</section>`;
 }
 
@@ -230,8 +242,7 @@ function taskHeaderHtml() {
       ? '<p class="record-empty">No public service decisions reviewed yet</p>'
       : `<div class="record-meter" role="progressbar" aria-label="Recovery accountability record: ${approvedPublicDecisions} approved public service decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`);
   return `<header class="task-header">
-    <section class="task-status-card"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong></section>
-    <section class="task-status-card salary-status"><span class="task-status-label">Payment status</span><strong>${escapeHtml(salaryStatus)}</strong></section>
+    <section class="task-status-card payment-summary"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong><span class="payment-status-label">Payment status</span><strong class="payment-status-value">${escapeHtml(salaryStatus)}</strong></section>
     <section class="task-status-card community-record ${recordUpdateClass}"><span class="task-status-label">Accountability record</span>${recordDisplay}</section>
     ${recoveryProgressHtml()}
   </header>`;
@@ -512,6 +523,52 @@ async function fetchingEvaluation() {
   await new Promise((resolve) => window.setTimeout(resolve, 1500));
 }
 
+async function animateDecisionRecorded(isGroup) {
+  const source = document.querySelector('.decision-recorded-source');
+  const token = source?.querySelector('.decision-recorded-token');
+  const destination = document.querySelector(isGroup ? '.community-record' : '.private-visibility');
+  const continueButton = document.querySelector('#continue');
+  const status = document.querySelector('.decision-recording-status');
+  const label = isGroup ? 'Public decision recorded' : 'Private decision recorded';
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const duration = reducedMotion ? 250 : 900;
+
+  if (!source || !token || !destination) {
+    if (continueButton) continueButton.disabled = false;
+    return;
+  }
+
+  const sourceRect = token.getBoundingClientRect();
+  const destinationRect = destination.getBoundingClientRect();
+  const floatingToken = token.cloneNode(true);
+  floatingToken.classList.add('floating-decision-token');
+  floatingToken.setAttribute('aria-hidden', 'true');
+  floatingToken.style.left = `${sourceRect.left}px`;
+  floatingToken.style.top = `${sourceRect.top}px`;
+  floatingToken.style.width = `${sourceRect.width}px`;
+  document.body.appendChild(floatingToken);
+  source.classList.add('decision-sent');
+
+  const moveX = destinationRect.left + (destinationRect.width / 2) - (sourceRect.left + (sourceRect.width / 2));
+  const moveY = destinationRect.top + (destinationRect.height / 2) - (sourceRect.top + (sourceRect.height / 2));
+  const animation = floatingToken.animate(
+    reducedMotion
+      ? [{ opacity: 1 }, { opacity: 0 }]
+      : [{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${moveX}px, ${moveY}px) scale(.78)`, opacity: .15 }],
+    { duration, easing: 'cubic-bezier(.22,.8,.25,1)', fill: 'forwards' },
+  );
+  await animation.finished.catch(() => {});
+  floatingToken.remove();
+  source.remove();
+  destination.insertAdjacentHTML('beforeend', `<span class="decision-recorded-result">${label}</span>`);
+  if (!isGroup) {
+    destination.classList.add('decision-destination-private');
+    window.setTimeout(() => destination.classList.remove('decision-destination-private'), 900);
+  }
+  if (status) status.textContent = '';
+  if (continueButton) continueButton.disabled = false;
+}
+
 async function showFeedback(trial, feedback) {
   const isGroup = trial.type === 'group';
   const message = isGroup
@@ -525,7 +582,9 @@ async function showFeedback(trial, feedback) {
     ? `<p class="accountability-update ${feedback.approved ? 'positive' : 'negative'}" role="status">This decision has ${feedback.approved ? 'improved' : 'negatively affected'} your accountability record.</p>`
     : '';
   const feedbackHeading = isGroup ? `<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2>` : '';
-  renderTask(`${feedbackHeading}<div class="profiles">${targetCard(trial, !isGroup)}</div>${requestFeedback}${visibility}${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
+  const recordingSource = `<div class="decision-recorded-source ${isGroup ? 'public' : 'private'}"><span class="decision-recorded-token">${isGroup ? 'PUBLIC DECISION' : 'PRIVATE DECISION'}</span></div>`;
+  renderTask(`${feedbackHeading}<div class="profiles">${targetCard(trial, !isGroup)}</div>${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div>`);
+  await animateDecisionRecorded(isGroup);
   await waitForButton('#continue');
 }
 
