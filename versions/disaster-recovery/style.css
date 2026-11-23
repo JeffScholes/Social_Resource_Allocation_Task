@@ -49,7 +49,7 @@ p, li { font-size: clamp(1.1rem, 1.8vw, 1.22rem); line-height: 1.6; }
 .instruction-body { white-space: pre-line; max-width: 720px; margin: 0 auto 28px; font-size: clamp(1.12rem, 1.9vw, 1.25rem); }
 .instruction-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .9fr); gap: 28px; align-items: center; margin-bottom: 28px; text-align: left; }
 .instruction-layout .instruction-body { max-width: none; margin: 0; }
-.instruction-layout.diagram-only { grid-template-columns: minmax(0, 560px); justify-content: center; }
+.instruction-layout.diagram-only { grid-template-columns: minmax(0, 760px); justify-content: center; }
 .instruction-layout.diagram-only .instruction-diagram { width: 100%; }
 .instruction-diagram { min-height: 220px; padding: 20px; border: 1px solid #cbd5e1; border-radius: 10px; background: #f6f8fb; color: #1f2937; text-align: center; }
 .diagram-card { display: inline-flex; flex-direction: column; justify-content: center; gap: 4px; min-height: 48px; padding: 10px 13px; border: 1px solid #94a3b8; border-radius: 7px; background: #fff; font-size: .9rem; font-weight: 700; letter-spacing: .035em; line-height: 1.2; }
@@ -73,12 +73,15 @@ p, li { font-size: clamp(1.1rem, 1.8vw, 1.22rem); line-height: 1.6; }
 .salary-split .diagram-card { flex: 1 1 0; min-width: 0; padding: 8px 6px; font-size: .9rem; }
 .salary-split .diagram-budget { flex: 0 0 58px; font-size: .9rem; }
 .flow-diagram, .ready-diagram { display: flex; align-items: stretch; justify-content: center; gap: 5px; }
-.flow-diagram { flex-direction: column; padding: 16px 10px; }
+.flow-diagram { flex-direction: column; min-height: 300px; padding: 28px 18px; }
 .flow-steps { display: flex; align-items: stretch; justify-content: center; gap: 5px; }
+.flow-diagram .flow-steps { gap: 9px; }
 .flow-steps > b, .ready-diagram > b, .demo-flow > b { display: flex; align-items: center; color: #475569; }
 .flow-step { display: flex; flex: 1 1 0; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; padding: 10px 7px; border: 1px solid #94a3b8; border-radius: 6px; background: #fff; font-size: .9rem; font-weight: 700; line-height: 1.2; text-align: center; }
 .flow-step span { color: #52606d; font-size: .9rem; }
 .flow-steps .flow-step:last-child { font-size: .9rem; }
+.flow-diagram .flow-step { min-height: 130px; padding: 14px 8px; }
+.flow-diagram .flow-steps > b { font-size: 1.25rem; }
 .diagram-note { margin: 10px 0 0; color: #425466; font-size: .92rem; line-height: 1.4; }
 .evaluations-diagram { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: center; }
 .evaluation-path { display: flex; flex-direction: column; align-items: center; gap: 7px; }

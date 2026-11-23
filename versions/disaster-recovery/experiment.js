@@ -350,7 +350,7 @@ async function chooseAllocation(trial) {
     <input id="allocation-slider" class="allocation-slider" type="range" min="0" max="${budget}" step="${step}" value="${defaultRecipientSupport}" aria-valuetext="Personal payment £${budget - defaultRecipientSupport}; recovery support £${defaultRecipientSupport}">
     <div class="allocation-endpoints muted" aria-hidden="true"><span>Keep everything</span><span>Give everything</span></div>
     <div class="actions"><button id="confirm-allocation" class="primary">Confirm allocation</button></div>
-  </div><div class="recipient-panel"><p class="recipient-label">Recovery recipient</p>${targetCard(trial)}</div></div>`);
+  </div><div class="recipient-panel"><p class="recipient-label">Recipient</p>${targetCard(trial)}</div></div>`);
   const onset = nowSeconds();
   const slider = document.querySelector('#allocation-slider');
   const selfAmount = document.querySelector('#self-amount');
