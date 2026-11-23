@@ -439,7 +439,7 @@ async function chooseAllocation(trial) {
     <input id="allocation-slider" class="allocation-slider" type="range" min="0" max="${budget}" step="${step}" value="${defaultRecipientSupport}" aria-valuetext="Personal payment £${budget - defaultRecipientSupport}; recovery support £${defaultRecipientSupport}">
     <div class="allocation-endpoints muted" aria-hidden="true"><span>Keep everything</span><span>Give everything</span></div>
     <div class="actions"><button id="confirm-allocation" class="primary">Confirm allocation</button></div>
-  </div><div class="recipient-panel"><p class="recipient-label">Recipient</p>${targetCard(trial, true)}</div></div>`);
+  </div><div class="recipient-panel">${targetCard(trial, true)}</div></div>`);
   const onset = nowSeconds();
   const slider = document.querySelector('#allocation-slider');
   const selfAmount = document.querySelector('#self-amount');
@@ -470,7 +470,7 @@ async function choosePrediction(trial) {
   const question = trial.type === 'group'
     ? `Do the ${trial.name} representatives think your allocation aligned with their standards for fair disaster recovery support?`
     : `Does ${trial.name} think your allocation treated them fairly?`;
-  renderTask(`<h2>${question}</h2><div class="prediction-target">${targetCard(trial)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">YES</button><button class="primary prediction" data-value="disapprove">NO</button></div>`);
+  renderTask(`<h2>${question}</h2><div class="prediction-target">${targetCard(trial, true)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">YES</button><button class="primary prediction" data-value="disapprove">NO</button></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
   return { prediction, responseTime: nowSeconds() - onset };
@@ -494,14 +494,15 @@ async function showFeedback(trial, feedback) {
   const message = isGroup
     ? (feedback.approved ? `${trial.name} standards for fair disaster support met.` : `${trial.name} standards for fair support not met.`)
     : (feedback.approved ? `${trial.name} judged that your allocation treated their recovery needs fairly.` : `${trial.name} judged that your allocation did not treat their recovery needs fairly.`);
-  const visibility = isGroup ? '' : `<p>This resident decision will only be visible to you and ${trial.name}.</p>`;
+  const visibility = isGroup ? '' : `<p class="private-visibility">This resident decision will only be visible to you and ${trial.name}.</p>`;
   const requestFeedback = !isGroup && trial.request
     ? `<div class="request-feedback ${feedback.approved ? 'positive' : 'negative'}"><p>${trial.request[feedback.approved ? 'positiveFeedback' : 'negativeFeedback'].replace('{name}', escapeHtml(trial.name))}</p>${feedback.approved ? '' : `<p>${trial.request.negativeConsequence.replace('{name}', escapeHtml(trial.name))}</p>`}</div>`
     : '';
   const recordUpdate = isGroup
-    ? `<p class="accountability-update ${feedback.approved ? 'positive' : 'negative'}" role="status">This public service decision has ${feedback.approved ? 'improved' : 'negatively affected'} your accountability record.</p>`
+    ? `<p class="accountability-update ${feedback.approved ? 'positive' : 'negative'}" role="status">This decision has ${feedback.approved ? 'improved' : 'negatively affected'} your accountability record.</p>`
     : '';
-  renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div>${visibility}${requestFeedback}${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
+  const feedbackHeading = isGroup ? `<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2>` : '';
+  renderTask(`${feedbackHeading}<div class="profiles">${targetCard(trial, !isGroup)}</div>${visibility}${requestFeedback}${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
 }
 

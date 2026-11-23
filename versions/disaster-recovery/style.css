@@ -174,8 +174,9 @@ label { display: block; text-align: left; font-weight: 700; }
 .request-feedback { width: min(680px, 100%); margin: 18px auto 0; padding: 14px 18px; border: 1px solid currentColor; border-radius: 8px; text-align: left; }
 .request-feedback p { margin: 0; font-weight: 700; }
 .request-feedback p + p { margin-top: 10px; }
-.request-feedback.positive { color: #176b39; background: #e8f7ed; }
-.request-feedback.negative { color: #b42318; background: #feeceb; }
+.request-feedback.positive { color: #176b39; background: #e8f7ed; animation: accountability-approved-pulse 3s ease-out both; }
+.request-feedback.negative { color: #b42318; background: #feeceb; animation: accountability-disapproved-pulse 3s ease-out both; }
+.private-visibility { width: fit-content; max-width: 100%; margin: 20px auto 0; padding: 8px 12px; border: 1px solid #3b6fa8; border-radius: 7px; color: #174f86; background: #e6f1fb; font-weight: 700; }
 .accountability-update { width: min(620px, 100%); margin: 20px auto 0; padding: 13px 16px; border: 1px solid currentColor; border-radius: 8px; font-weight: 700; }
 .accountability-update.positive { color: #176b39; background: #e8f7ed; animation: accountability-approved-pulse 3s ease-out both; }
 .accountability-update.negative { color: #b42318; background: #feeceb; animation: accountability-disapproved-pulse 3s ease-out both; }
