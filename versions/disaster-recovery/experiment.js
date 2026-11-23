@@ -467,10 +467,14 @@ async function chooseAllocation(trial) {
 }
 
 async function choosePrediction(trial) {
-  const question = trial.type === 'group'
-    ? `Do the ${trial.name} representatives think your allocation aligned with their standards for fair disaster recovery support?`
-    : `Does ${trial.name} think your allocation treated them fairly?`;
-  renderTask(`<h2>${question}</h2><div class="prediction-target">${targetCard(trial, true)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">YES</button><button class="primary prediction" data-value="disapprove">NO</button></div>`);
+  const isGroup = trial.type === 'group';
+  const heading = isGroup ? 'Predict the service’s evaluation' : 'Predict the resident’s evaluation';
+  const evaluationBasis = isGroup
+    ? 'Whether the allocation meets the service’s standards for fair disaster-recovery support.'
+    : 'Whether the resident feels they were treated fairly.';
+  const approveLabel = isGroup ? 'MEETS STANDARD' : 'FAIRLY TREATED';
+  const disapproveLabel = isGroup ? 'DOES NOT MEET STANDARD' : 'NOT FAIRLY TREATED';
+  renderTask(`<h2>${heading}</h2><p class="evaluation-basis"><strong>Evaluation basis:</strong> ${evaluationBasis}</p><div class="prediction-target">${targetCard(trial, true)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">${approveLabel}</button><button class="primary prediction" data-value="disapprove">${disapproveLabel}</button></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
   return { prediction, responseTime: nowSeconds() - onset };
@@ -502,7 +506,7 @@ async function showFeedback(trial, feedback) {
     ? `<p class="accountability-update ${feedback.approved ? 'positive' : 'negative'}" role="status">This decision has ${feedback.approved ? 'improved' : 'negatively affected'} your accountability record.</p>`
     : '';
   const feedbackHeading = isGroup ? `<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2>` : '';
-  renderTask(`${feedbackHeading}<div class="profiles">${targetCard(trial, !isGroup)}</div>${visibility}${requestFeedback}${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
+  renderTask(`${feedbackHeading}<div class="profiles">${targetCard(trial, !isGroup)}</div>${requestFeedback}${visibility}${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
 }
 
