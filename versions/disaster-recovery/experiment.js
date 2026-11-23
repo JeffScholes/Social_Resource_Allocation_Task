@@ -33,6 +33,78 @@ const INDIVIDUALS = [
   { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/john_smith.png' },
   { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/julia_hart.png' },
 ];
+const INDIVIDUAL_REQUESTS = [
+  {
+    id: 'identity_documents',
+    allocationText: 'Seeking funds to replace identification documents lost during the storm.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards replacing essential identification.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards replacing essential identification.',
+    negativeConsequence: '{name} was unable to replace the identification needed for recovery paperwork.',
+  },
+  {
+    id: 'insurance_paperwork',
+    allocationText: 'Seeking funds for copies, printing, and postage needed for an insurance claim.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards progressing their insurance claim.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards progressing their insurance claim.',
+    negativeConsequence: '{name} was unable to complete the paperwork needed to progress their insurance claim.',
+  },
+  {
+    id: 'bank_card_replacement',
+    allocationText: 'Seeking funds to replace a bank card and restore access to their account.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards restoring access to their account.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards restoring access to their account.',
+    negativeConsequence: '{name} was unable to replace their bank card and restore access to their account.',
+  },
+  {
+    id: 'phone_repair',
+    allocationText: 'Seeking funds to repair a storm-damaged phone.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards restoring essential phone access.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards restoring essential phone access.',
+    negativeConsequence: '{name} was unable to repair their phone and remain reachable during recovery.',
+  },
+  {
+    id: 'mobile_data',
+    allocationText: 'Seeking funds for mobile data needed to manage recovery arrangements online.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards managing recovery arrangements online.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards managing recovery arrangements online.',
+    negativeConsequence: '{name} was unable to access the online information needed to manage recovery arrangements.',
+  },
+  {
+    id: 'device_charging',
+    allocationText: 'Seeking funds for a replacement charger and power bank.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards keeping essential devices working.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards keeping essential devices working.',
+    negativeConsequence: '{name} was unable to keep their phone charged while recovery arrangements continued.',
+  },
+  {
+    id: 'work_uniform',
+    allocationText: 'Seeking funds to replace a work uniform damaged during the storm.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards returning to work.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards returning to work.',
+    negativeConsequence: '{name} was unable to replace their work uniform and return to work as planned.',
+  },
+  {
+    id: 'work_tools',
+    allocationText: 'Seeking funds to replace basic tools or equipment needed for work.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards resuming paid work.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards resuming paid work.',
+    negativeConsequence: '{name} was unable to replace the equipment needed to resume paid work.',
+  },
+  {
+    id: 'job_applications',
+    allocationText: 'Seeking funds for printing, internet access, and application fees while looking for work.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards seeking work after the storm.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards seeking work after the storm.',
+    negativeConsequence: '{name} was unable to complete the applications needed to seek work after the storm.',
+  },
+  {
+    id: 'pet_care',
+    allocationText: 'Seeking funds for food and basic care for a pet affected by the storm.',
+    positiveFeedback: '{name} judged that your allocation provided fair support towards caring for their pet.',
+    negativeFeedback: '{name} judged that your allocation did not provide fair support towards caring for their pet.',
+    negativeConsequence: '{name} was unable to buy the food and basic supplies needed to care for their pet.',
+  },
+];
 const INTRO_DIAGRAMS = {
   committee: `<div class="instruction-diagram committee-diagram" role="img" aria-label="You are a temporary recovery coordinator who decides how a £1,000 storm-recovery budget is divided.">
     <div class="diagram-card diagram-you">YOU<span>Temporary recovery coordinator</span></div>
@@ -293,6 +365,21 @@ function buildTargets() {
   return [...GROUPS, ...INDIVIDUALS];
 }
 
+function assignIndividualRequests(trials) {
+  let requestPool = shuffle(INDIVIDUAL_REQUESTS);
+  let requestIndex = 0;
+  return trials.map((trial) => {
+    if (trial.type !== 'individual') return trial;
+    if (requestIndex === requestPool.length) {
+      requestPool = shuffle(INDIVIDUAL_REQUESTS);
+      requestIndex = 0;
+    }
+    const request = requestPool[requestIndex];
+    requestIndex += 1;
+    return { ...trial, request };
+  });
+}
+
 function buildTrials() {
   const targets = buildTargets();
   const design = [];
@@ -302,10 +389,11 @@ function buildTrials() {
     for (let index = 0; index < repetitions; index += 1) design.push({ ...target });
   });
   shuffle(targets).slice(0, remainder).forEach((target) => design.push({ ...target }));
-  return shuffle(design).map((target, index) => ({
+  const trials = shuffle(design).map((target, index) => ({
     ...target,
     trial_num: index + 1,
   }));
+  return assignIndividualRequests(trials);
 }
 
 function initialiseHiddenTargets() {
@@ -334,9 +422,10 @@ function feedbackFor(trial, choice, hidden) {
   };
 }
 
-function targetCard(trial) {
+function targetCard(trial, showAllocationRequest = false) {
   const theme = trial.type === 'group' ? 'teal' : 'amber';
-  return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3><p>${escapeHtml(trial.description)}</p></aside>`;
+  const description = showAllocationRequest && trial.request ? trial.request.allocationText : trial.description;
+  return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3><p>${escapeHtml(description)}</p></aside>`;
 }
 
 async function chooseAllocation(trial) {
@@ -350,7 +439,7 @@ async function chooseAllocation(trial) {
     <input id="allocation-slider" class="allocation-slider" type="range" min="0" max="${budget}" step="${step}" value="${defaultRecipientSupport}" aria-valuetext="Personal payment £${budget - defaultRecipientSupport}; recovery support £${defaultRecipientSupport}">
     <div class="allocation-endpoints muted" aria-hidden="true"><span>Keep everything</span><span>Give everything</span></div>
     <div class="actions"><button id="confirm-allocation" class="primary">Confirm allocation</button></div>
-  </div><div class="recipient-panel"><p class="recipient-label">Recipient</p>${targetCard(trial)}</div></div>`);
+  </div><div class="recipient-panel"><p class="recipient-label">Recipient</p>${targetCard(trial, true)}</div></div>`);
   const onset = nowSeconds();
   const slider = document.querySelector('#allocation-slider');
   const selfAmount = document.querySelector('#self-amount');
@@ -406,10 +495,13 @@ async function showFeedback(trial, feedback) {
     ? (feedback.approved ? `${trial.name} standards for fair disaster support met.` : `${trial.name} standards for fair support not met.`)
     : (feedback.approved ? `${trial.name} judged that your allocation treated their recovery needs fairly.` : `${trial.name} judged that your allocation did not treat their recovery needs fairly.`);
   const visibility = isGroup ? '' : `<p>This resident decision will only be visible to you and ${trial.name}.</p>`;
+  const requestFeedback = !isGroup && trial.request
+    ? `<div class="request-feedback ${feedback.approved ? 'positive' : 'negative'}"><p>${trial.request[feedback.approved ? 'positiveFeedback' : 'negativeFeedback'].replace('{name}', escapeHtml(trial.name))}</p>${feedback.approved ? '' : `<p>${trial.request.negativeConsequence.replace('{name}', escapeHtml(trial.name))}</p>`}</div>`
+    : '';
   const recordUpdate = isGroup
     ? `<p class="accountability-update ${feedback.approved ? 'positive' : 'negative'}" role="status">This public service decision has ${feedback.approved ? 'improved' : 'negatively affected'} your accountability record.</p>`
     : '';
-  renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div>${visibility}${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
+  renderTask(`<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2><div class="profiles">${targetCard(trial)}</div>${visibility}${requestFeedback}${recordUpdate}<div class="actions"><button id="continue" class="primary">Continue</button></div>`);
   await waitForButton('#continue');
 }
 
@@ -510,6 +602,14 @@ async function runTrials() {
       trial_num: trial.trial_num,
       target_type: trial.type,
       target_name: trial.name,
+      individual_request_id: trial.request ? trial.request.id : '',
+      individual_request_text: trial.request ? trial.request.allocationText : '',
+      individual_request_positive_feedback: trial.request ? trial.request.positiveFeedback : '',
+      individual_request_negative_feedback: trial.request ? trial.request.negativeFeedback : '',
+      individual_request_negative_consequence: trial.request ? trial.request.negativeConsequence : '',
+      individual_request_feedback_shown: trial.request
+        ? (feedback.approved ? trial.request.positiveFeedback : `${trial.request.negativeFeedback} ${trial.request.negativeConsequence}`).replaceAll('{name}', trial.name)
+        : '',
       evaluator_group: feedback.evaluator_group,
       strict_lenient_assignment: feedback.strict_lenient_assignment,
       self_amount: allocation.choice.self_amount,
