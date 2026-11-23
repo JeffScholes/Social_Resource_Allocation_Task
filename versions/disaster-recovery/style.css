@@ -102,8 +102,8 @@ p, li { font-size: clamp(1.1rem, 1.8vw, 1.22rem); line-height: 1.6; }
 .dashboard-card strong { margin-top: 6px; color: #1f2937; font-size: 1.05rem; }
 .dashboard-card.dashboard-record { border-color: #007b7b; }
 .dashboard-card .mini-record { width: 100%; margin-top: 11px; }
-.ready-diagram { align-items: center; padding: 30px 12px; }
-.ready-diagram .flow-step { max-width: 105px; min-height: 54px; }
+.ready-diagram { align-items: center; min-height: 280px; gap: 12px; padding: 40px 24px; }
+.ready-diagram .flow-step { max-width: 175px; min-height: 110px; padding: 14px 12px; font-size: 1rem; }
 .primary, .secondary, .choice, .rating-option {
   border: 2px solid #94a3b8;
   border-radius: 8px;
