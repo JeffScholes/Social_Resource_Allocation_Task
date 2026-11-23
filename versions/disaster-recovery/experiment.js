@@ -200,8 +200,19 @@ function recoveryProgressHtml() {
   const markerPosition = 12.5 + ((recoveryStage - 1) * 25);
   return `<section class="recovery-progress" aria-label="Recovery programme progress">
     <div class="town-map" role="img" aria-label="Stylised town recovery map, stage ${recoveryStage} of 4.">
-      <span class="map-road map-road-one"></span><span class="map-road map-road-two"></span>
-      <span class="town-landmark landmark-one"></span><span class="town-landmark landmark-two"></span><span class="town-landmark landmark-three"></span><span class="town-landmark landmark-four"></span><span class="town-landmark landmark-five"></span>
+      <svg viewBox="0 0 320 150" aria-hidden="true" focusable="false">
+        <rect class="map-ground" x="0" y="0" width="320" height="150"></rect>
+        <path class="map-river" d="M-10 118 C45 91 77 141 130 112 S224 91 330 119 L330 156 L-10 156 Z"></path>
+        <path class="map-road" d="M-8 35 C58 43 91 64 148 50 S249 22 330 43"></path>
+        <path class="map-road map-road-small" d="M79 0 C105 35 113 61 106 111"></path>
+        <g class="map-building house-one"><rect class="building-wall" x="25" y="50" width="35" height="27" rx="2"></rect><path class="building-roof" d="M19 51 L42.5 32 L66 51 Z"></path><rect class="building-door" x="39" y="64" width="8" height="13"></rect></g>
+        <g class="map-building house-two"><rect class="building-wall" x="131" y="64" width="37" height="27" rx="2"></rect><path class="building-roof" d="M125 65 L149.5 45 L174 65 Z"></path><rect class="building-door" x="145" y="78" width="8" height="13"></rect></g>
+        <g class="map-building house-three"><rect class="building-wall" x="234" y="48" width="35" height="29" rx="2"></rect><path class="building-roof" d="M228 49 L251.5 29 L275 49 Z"></path><rect class="building-door" x="248" y="64" width="8" height="13"></rect></g>
+        <g class="map-building community-building"><rect class="building-wall" x="189" y="88" width="55" height="28" rx="2"></rect><path class="building-roof" d="M181 89 L216.5 70 L252 89 Z"></path><rect class="building-door" x="212" y="102" width="10" height="14"></rect><rect class="building-window" x="197" y="98" width="8" height="8"></rect><rect class="building-window" x="229" y="98" width="8" height="8"></rect></g>
+        <g class="map-tree"><circle cx="77" cy="97" r="12"></circle><rect x="74" y="106" width="6" height="13"></rect></g>
+        <g class="map-tree"><circle cx="285" cy="98" r="13"></circle><rect x="282" y="108" width="6" height="13"></rect></g>
+        <g class="map-tree"><circle cx="168" cy="25" r="10"></circle><rect x="165" y="33" width="6" height="12"></rect></g>
+      </svg>
     </div>
     <div class="recovery-horizon" role="progressbar" aria-label="Recovery programme progress: ${completedTrials} of ${totalTrials} rounds completed" aria-valuemin="0" aria-valuemax="${totalTrials}" aria-valuenow="${completedTrials}"><span class="recovery-marker" style="left: ${markerPosition}%"></span></div>
   </section>`;
@@ -209,7 +220,8 @@ function recoveryProgressHtml() {
 
 function render(content, extraClass = '') {
   if (!taskStatus) delete app.dataset.recoveryStage;
-  app.innerHTML = `<section class="panel ${extraClass}">${content}</section>`;
+  const weatherMotif = taskStatus ? '<div class="weather-motif" aria-hidden="true"><span class="storm-cloud cloud-left"></span><span class="storm-cloud cloud-right"></span></div>' : '';
+  app.innerHTML = `${weatherMotif}<section class="panel ${extraClass}">${content}</section>`;
 }
 
 function taskHeaderHtml() {
