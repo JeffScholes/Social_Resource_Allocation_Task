@@ -191,7 +191,24 @@ function expectedSalaryForTrials(trials, completedTrials) {
     .reduce((total, trial) => total + (allocationSettingsFor(trial).budget / 2), 0);
 }
 
+function recoveryStageFor(completedTrials, totalTrials) {
+  return Math.min(4, Math.floor((completedTrials / totalTrials) * 4) + 1);
+}
+
+function recoveryProgressHtml() {
+  const { completedTrials, totalTrials, recoveryStage } = taskStatus;
+  const markerPosition = 12.5 + ((recoveryStage - 1) * 25);
+  return `<section class="recovery-progress" aria-label="Recovery programme progress">
+    <div class="town-map" role="img" aria-label="Stylised town recovery map, stage ${recoveryStage} of 4.">
+      <span class="map-road map-road-one"></span><span class="map-road map-road-two"></span>
+      <span class="town-landmark landmark-one"></span><span class="town-landmark landmark-two"></span><span class="town-landmark landmark-three"></span><span class="town-landmark landmark-four"></span><span class="town-landmark landmark-five"></span>
+    </div>
+    <div class="recovery-horizon" role="progressbar" aria-label="Recovery programme progress: ${completedTrials} of ${totalTrials} rounds completed" aria-valuemin="0" aria-valuemax="${totalTrials}" aria-valuenow="${completedTrials}"><span class="recovery-marker" style="left: ${markerPosition}%"></span></div>
+  </section>`;
+}
+
 function render(content, extraClass = '') {
+  if (!taskStatus) delete app.dataset.recoveryStage;
   app.innerHTML = `<section class="panel ${extraClass}">${content}</section>`;
 }
 
@@ -216,10 +233,12 @@ function taskHeaderHtml() {
     <section class="task-status-card"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong></section>
     <section class="task-status-card salary-status"><span class="task-status-label">Payment status</span><strong>${escapeHtml(salaryStatus)}</strong></section>
     <section class="task-status-card community-record ${recordUpdateClass}"><span class="task-status-label">Accountability record</span>${recordDisplay}</section>
+    ${recoveryProgressHtml()}
   </header>`;
 }
 
 function renderTask(content, extraClass = '') {
+  app.dataset.recoveryStage = String(taskStatus.recoveryStage);
   render(`${taskHeaderHtml()}${content}`, extraClass);
 }
 
@@ -470,11 +489,11 @@ async function choosePrediction(trial) {
   const isGroup = trial.type === 'group';
   const heading = isGroup ? 'Predict the service’s evaluation' : 'Predict the resident’s evaluation';
   const evaluationBasis = isGroup
-    ? 'Whether the allocation meets the service’s standards for fair disaster-recovery support.'
-    : 'Whether the resident feels they were treated fairly.';
+    ? 'Have the service’s standards for fair disaster-recovery support been met?'
+    : 'Was the individual treated fairly?';
   const approveLabel = isGroup ? 'MEETS STANDARD' : 'FAIRLY TREATED';
   const disapproveLabel = isGroup ? 'DOES NOT MEET STANDARD' : 'NOT FAIRLY TREATED';
-  renderTask(`<h2>${heading}</h2><p class="evaluation-basis"><strong>Evaluation basis:</strong> ${evaluationBasis}</p><div class="prediction-target">${targetCard(trial, true)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">${approveLabel}</button><button class="primary prediction" data-value="disapprove">${disapproveLabel}</button></div>`);
+  renderTask(`<h2>${heading}</h2><p class="evaluation-basis">${evaluationBasis}</p><div class="prediction-target">${targetCard(trial, true)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">${approveLabel}</button><button class="primary prediction" data-value="disapprove">${disapproveLabel}</button></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
   return { prediction, responseTime: nowSeconds() - onset };
@@ -567,8 +586,13 @@ async function runTrials() {
     salaryStatusUpdated: false,
     currentTrialType: '',
     accountabilityUpdate: '',
+    completedTrials: 0,
+    totalTrials: trials.length,
+    recoveryStage: 1,
   };
   for (const trial of trials) {
+    const recoveryStage = recoveryStageFor(taskStatus.completedTrials, taskStatus.totalTrials);
+    taskStatus.recoveryStage = recoveryStage;
     taskStatus.currentTrialType = trial.type;
     taskStatus.accountabilityUpdate = '';
     const allocation = await chooseAllocation(trial);
@@ -627,6 +651,7 @@ async function runTrials() {
       committee_expected_salary: taskStatus.expectedSalary,
       salary_status_updated: taskStatus.salaryStatusUpdated,
       accountability_record_update: trial.type === 'group' ? (feedback.approved ? 'approved' : 'disapproved') : 'not_applicable_private_trial',
+      recovery_programme_stage: recoveryStage,
       allocation_response_time: allocation.responseTime,
       prediction_response_time: prediction.responseTime,
       confidence_response_time: confidence.responseTime,
@@ -642,6 +667,7 @@ async function runTrials() {
       shame_rating: emotion ? emotion.shameRating : '',
       guilt_rating: emotion ? emotion.guiltRating : '',
     });
+    taskStatus.completedTrials = trial.trial_num;
   }
   taskStatus = null;
 }
