@@ -27,8 +27,8 @@ const PILOT = true;
 const INPUT_GUARD_MS = 250;
 
 const GROUPS = [
-  { id: 'shelter', name: 'Temporary Shelter Fund', type: 'group', description: 'Provides safe short-term accommodation, bedding, and basic support for residents displaced by the storm.', image: 'assets/images/temporary_shelter_fund_v2.png' },
-  { id: 'essentials', name: 'Essential Recovery Fund', type: 'group', description: 'Provides food, hygiene supplies, transport, and essential household items during recovery.', image: 'assets/images/essential_recovery_fund_v2.png' },
+  { id: 'shelter', name: 'Temporary Shelter Service', type: 'group', description: 'Provides safe short-term accommodation, bedding, and basic support for residents displaced by the storm.', image: 'assets/images/temporary_shelter_fund_v2.png' },
+  { id: 'essentials', name: 'Essential Recovery Service', type: 'group', description: 'Provides food, hygiene supplies, transport, and essential household items during recovery.', image: 'assets/images/essential_recovery_fund_v2.png' },
 ];
 const INDIVIDUALS = [
   { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/morgan_patel_v2.png' },
@@ -107,12 +107,12 @@ const INDIVIDUAL_REQUESTS = [
   },
 ];
 const INTRO_DIAGRAMS = {
-  committee: `<div class="instruction-diagram committee-diagram" role="img" aria-label="You are a temporary recovery coordinator who decides how a £1,000 storm-recovery budget is divided.">
-    <div class="diagram-card diagram-you">YOU<span>Temporary recovery coordinator</span></div>
+  committee: `<div class="instruction-diagram committee-diagram" role="img" aria-label="You are a temporary response coordinator who decides how each storm-recovery funding instalment is allocated.">
+    <div class="diagram-card diagram-you">YOU<span>Temporary response coordinator</span></div>
     <div class="diagram-arrow">↓</div>
-    <div class="diagram-card diagram-budget">£1,000<span>Storm-recovery budget</span></div>
+    <div class="diagram-card diagram-budget">Storm-recovery funding instalment</div>
     <div class="diagram-arrow">↓</div>
-    <div class="diagram-caption">Decide how it is allocated</div>
+    <div class="diagram-caption">Decide how each instalment is allocated</div>
   </div>`,
   salary: `<div class="instruction-diagram salary-diagram" role="img" aria-label="Individual rounds divide £100 between your personal payment and an affected resident's recovery support. Service rounds divide £1,000 between your personal payment and a recovery service.">
     <div class="salary-row"><span class="diagram-row-label">RESIDENT ROUND</span><div class="salary-split"><div class="diagram-card diagram-budget">£100</div><span class="diagram-arrow horizontal">→</span><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><span class="diagram-plus">+</span><div class="diagram-card diagram-individual">RESIDENT SUPPORT</div></div></div>
@@ -133,9 +133,9 @@ const INTRO_DIAGRAMS = {
     <div class="bonus-inputs"><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><div class="diagram-plus">+</div><div class="diagram-card diagram-record">ACCOUNTABILITY RECORD</div></div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-payment">POTENTIAL FINAL PAYMENT</div>
   </div>`,
   progress: `<div class="instruction-diagram dashboard-diagram" role="img" aria-label="Task header showing your personal payment and payment status together, accountability record, and a visual recovery programme progress map.">
-    <div class="dashboard-preview"><div class="dashboard-card"><span>Personal payment</span><strong>£3,400</strong><small>Payment status: On track</small></div><div class="dashboard-card dashboard-record"><span>Accountability record</span><div class="mini-record"><span></span></div></div><div class="dashboard-card dashboard-programme"><img src="assets/images/recovery-stage-1.png" alt=""><div class="mini-record"><span></span></div></div></div><p class="diagram-note">These indicators will remain visible throughout the task.</p>
+    <div class="dashboard-preview"><div class="dashboard-status-stack"><div class="dashboard-card dashboard-payment"><span>Personal payment</span><strong>£3,400</strong><small>Payment status</small><b>On track</b></div><div class="dashboard-card dashboard-record"><span>Accountability record</span><div class="mini-record"><span></span></div></div></div><div class="dashboard-card dashboard-programme"><span class="dashboard-programme-title">Town rebuild progress</span><img src="assets/images/recovery-stage-1.png" alt=""><div class="mini-record"><span></span></div></div></div><p class="diagram-note dashboard-note">These indicators will remain visible throughout the task.</p>
   </div>`,
-  ready: `<div class="instruction-diagram ready-diagram" role="img" aria-label="You are ready to allocate £1,000, predict a response, and see feedback."><div class="flow-step">Allocate £1,000</div><b>→</b><div class="flow-step">Predict</div><b>→</b><div class="flow-step">See feedback</div></div>`,
+  ready: `<div class="instruction-diagram ready-diagram" role="img" aria-label="You are ready to allocate funds, predict a response, and see feedback."><div class="flow-step">Allocate funds</div><b>→</b><div class="flow-step">Predict</div><b>→</b><div class="flow-step">See feedback</div></div>`,
 };
 
 const app = document.querySelector('#app');
@@ -793,8 +793,8 @@ async function finishExperiment() {
 }
 
 async function runExperiment() {
-  await showInstruction('Disaster recovery response', '', INTRO_DIAGRAMS.committee, 'assets/audio/01.wav');
-  await showInstruction('Who will receive disaster support?', '', INTRO_DIAGRAMS.salary, 'assets/audio/02.wav');
+  await showInstruction('Storm disaster response', '', INTRO_DIAGRAMS.committee, 'assets/audio/01.wav');
+  await showInstruction('Who needs support?', '', INTRO_DIAGRAMS.salary, 'assets/audio/02.wav');
   await showProfiles('Recovery services', '', GROUPS, 'teal', 'assets/audio/03.wav');
   await showProfiles('Affected residents', '', INDIVIDUALS, 'amber', 'assets/audio/04.wav');
   await showInstruction('How feedback works', '', INTRO_DIAGRAMS.evaluations, 'assets/audio/05.wav');
