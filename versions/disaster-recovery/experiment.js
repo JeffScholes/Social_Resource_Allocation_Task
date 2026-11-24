@@ -465,6 +465,9 @@ function feedbackFor(trial, choice, hidden) {
 function targetCard(trial, showAllocationRequest = false) {
   const theme = trial.type === 'group' ? 'teal' : 'amber';
   const description = showAllocationRequest && trial.request ? trial.request.allocationText : trial.description;
+  if (trial.type === 'individual' && showAllocationRequest && trial.request) {
+    return `<div class="resident-target-stack"><aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3></aside><section class="resident-request" aria-label="Current request"><span class="resident-request-label">Current request</span><p>${escapeHtml(description)}</p></section></div>`;
+  }
   return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3><p>${escapeHtml(description)}</p></aside>`;
 }
 

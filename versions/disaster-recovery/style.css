@@ -222,6 +222,10 @@ label { display: block; text-align: left; font-weight: 700; }
 .allocation-bar { display: flex; width: 100%; height: 16px; margin-top: 11px; overflow: hidden; border: 1px solid #94a3b8; border-radius: 3px; }
 .allocation-keep { background: #dbe4ee; }
 .allocation-give { background: #7186a1; }
+.resident-target-stack { display: grid; width: 100%; gap: 10px; }
+.resident-request { width: 100%; padding: 12px 14px; border: 2px solid #b06400; border-left-width: 6px; border-radius: 8px; background: #fff6e7; color: #6b3a00; text-align: left; }
+.resident-request-label { display: block; color: #8a4b00; font-size: .8rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.resident-request p { margin: 5px 0 0; font-size: 1.06rem; font-weight: 700; line-height: 1.45; }
 .target-card p { font-size: 1.05rem; }
 .target-card img { max-height: 250px; }
 .fetching { font-size: 1.3rem; padding: 70px 0; }
@@ -271,6 +275,7 @@ label { display: block; text-align: left; font-weight: 700; }
 .feedback-target .target-card { width: 100%; }
 .feedback-target .target-card.amber { text-align: center; }
 .feedback-target .target-card.amber p { text-align: center; }
+.feedback-target .resident-request { text-align: center; }
 .feedback-target .target-card.teal { text-align: center; }
 .feedback-target .target-card.teal p { text-align: center; }
 .feedback-details { display: flex; min-width: 0; flex-direction: column; justify-content: flex-end; }
