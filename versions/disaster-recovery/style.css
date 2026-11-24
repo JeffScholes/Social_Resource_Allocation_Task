@@ -271,6 +271,8 @@ label { display: block; text-align: left; font-weight: 700; }
 .feedback-target .target-card { width: 100%; }
 .feedback-target .target-card.amber { text-align: center; }
 .feedback-target .target-card.amber p { text-align: center; }
+.feedback-target .target-card.teal { text-align: center; }
+.feedback-target .target-card.teal p { text-align: center; }
 .feedback-details { display: flex; min-width: 0; flex-direction: column; justify-content: flex-end; }
 .feedback-details .feedback { margin: 0 0 16px; }
 .feedback-details .request-feedback, .feedback-details .accountability-update { width: 100%; margin: 0; }
@@ -280,6 +282,9 @@ label { display: block; text-align: left; font-weight: 700; }
 .feedback-details .decision-recorded-source + .accountability-update { margin-top: 14px; }
 .feedback-details .decision-recording-status { margin: 12px 0 0; }
 .feedback-details .actions { justify-content: flex-start; margin-top: 16px; }
+.service-feedback .feedback-details { text-align: center; }
+.service-feedback .feedback-details .decision-recorded-source,
+.service-feedback .feedback-details .actions { justify-content: center; }
 .vertical-choices { display: grid; gap: 14px; width: min(580px, 100%); margin: 30px auto 0; }
 .vertical-choices .primary { width: 100%; }
 .panel.task-panel.emotion-probe { min-height: min(560px, calc(100vh - 56px)); }

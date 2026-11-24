@@ -511,8 +511,8 @@ async function choosePrediction(trial) {
   const evaluationBasis = isGroup
     ? 'Have the service’s standards for fair disaster-recovery support been met?'
     : 'Was the individual treated fairly?';
-  const approveLabel = isGroup ? 'MEETS STANDARD' : 'FAIRLY TREATED';
-  const disapproveLabel = isGroup ? 'DOES NOT MEET STANDARD' : 'NOT FAIRLY TREATED';
+  const approveLabel = isGroup ? 'STANDARDS MET' : 'FAIRLY TREATED';
+  const disapproveLabel = isGroup ? 'STANDARDS NOT MET' : 'NOT FAIRLY TREATED';
   renderTask(`<div class="prediction-layout"><div class="prediction-copy"><h2>${heading}</h2><p class="evaluation-basis">${evaluationBasis}</p><div class="decision-row"><button class="primary prediction" data-value="approve">${approveLabel}</button><button class="primary prediction" data-value="disapprove">${disapproveLabel}</button></div></div><div class="prediction-decision"><div class="prediction-target">${targetCard(trial, true)}</div></div></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
@@ -592,7 +592,7 @@ async function showFeedback(trial, feedback) {
     : '';
   const feedbackHeading = isGroup ? `<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2>` : '';
   const recordingSource = `<div class="decision-recorded-source ${isGroup ? 'public' : 'private'}"><span class="decision-recorded-token">${isGroup ? 'PUBLIC DECISION' : 'PRIVATE DECISION'}</span></div>`;
-  renderTask(`<div class="feedback-layout"><div class="feedback-details">${feedbackHeading}${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div></div><div class="feedback-target">${targetCard(trial, !isGroup)}</div></div>`);
+  renderTask(`<div class="feedback-layout ${isGroup ? 'service-feedback' : 'resident-feedback'}"><div class="feedback-details">${feedbackHeading}${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div></div><div class="feedback-target">${targetCard(trial, !isGroup)}</div></div>`);
   await animateDecisionRecorded(isGroup);
   await waitForButton('#continue');
 }
