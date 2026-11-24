@@ -513,7 +513,7 @@ async function choosePrediction(trial) {
     : 'Was the individual treated fairly?';
   const approveLabel = isGroup ? 'MEETS STANDARD' : 'FAIRLY TREATED';
   const disapproveLabel = isGroup ? 'DOES NOT MEET STANDARD' : 'NOT FAIRLY TREATED';
-  renderTask(`<div class="prediction-layout"><div class="prediction-copy"><h2>${heading}</h2><p class="evaluation-basis">${evaluationBasis}</p></div><div class="prediction-decision"><div class="prediction-target">${targetCard(trial, true)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">${approveLabel}</button><button class="primary prediction" data-value="disapprove">${disapproveLabel}</button></div></div></div>`);
+  renderTask(`<div class="prediction-layout"><div class="prediction-copy"><h2>${heading}</h2><p class="evaluation-basis">${evaluationBasis}</p><div class="decision-row"><button class="primary prediction" data-value="approve">${approveLabel}</button><button class="primary prediction" data-value="disapprove">${disapproveLabel}</button></div></div><div class="prediction-decision"><div class="prediction-target">${targetCard(trial, true)}</div></div></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
   return { prediction, responseTime: nowSeconds() - onset };
@@ -583,7 +583,7 @@ async function showFeedback(trial, feedback) {
   const message = isGroup
     ? (feedback.approved ? `${trial.name} standards for fair disaster support met.` : `${trial.name} standards for fair support not met.`)
     : (feedback.approved ? `${trial.name} judged that your allocation treated their recovery needs fairly.` : `${trial.name} judged that your allocation did not treat their recovery needs fairly.`);
-  const visibility = isGroup ? '' : `<p class="private-visibility">This resident decision will only be visible to you and ${trial.name}.</p>`;
+  const visibility = isGroup ? '' : `<p class="private-visibility">Decision only visible to you and ${trial.name}.</p>`;
   const requestFeedback = !isGroup && trial.request
     ? `<div class="request-feedback ${feedback.approved ? 'positive' : 'negative'}"><p>${trial.request[feedback.approved ? 'positiveFeedback' : 'negativeFeedback'].replace('{name}', escapeHtml(trial.name))}</p>${feedback.approved ? '' : `<p>${trial.request.negativeConsequence.replace('{name}', escapeHtml(trial.name))}</p>`}</div>`
     : '';
@@ -592,7 +592,7 @@ async function showFeedback(trial, feedback) {
     : '';
   const feedbackHeading = isGroup ? `<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2>` : '';
   const recordingSource = `<div class="decision-recorded-source ${isGroup ? 'public' : 'private'}"><span class="decision-recorded-token">${isGroup ? 'PUBLIC DECISION' : 'PRIVATE DECISION'}</span></div>`;
-  renderTask(`<div class="feedback-layout"><div class="feedback-target">${targetCard(trial, !isGroup)}</div><div class="feedback-details">${feedbackHeading}${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div></div></div>`);
+  renderTask(`<div class="feedback-layout"><div class="feedback-details">${feedbackHeading}${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div></div><div class="feedback-target">${targetCard(trial, !isGroup)}</div></div>`);
   await animateDecisionRecorded(isGroup);
   await waitForButton('#continue');
 }
