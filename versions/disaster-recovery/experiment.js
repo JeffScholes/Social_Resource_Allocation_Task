@@ -26,12 +26,12 @@ const PILOT = true;
 const INPUT_GUARD_MS = 250;
 
 const GROUPS = [
-  { id: 'shelter', name: 'Temporary Shelter Fund', type: 'group', description: 'Provides safe short-term accommodation, bedding, and basic support for residents displaced by the storm.', image: 'assets/images/temporary_shelter_fund.png' },
-  { id: 'essentials', name: 'Essential Recovery Fund', type: 'group', description: 'Provides food, hygiene supplies, transport, and essential household items during recovery.', image: 'assets/images/essential_recovery_fund.png' },
+  { id: 'shelter', name: 'Temporary Shelter Fund', type: 'group', description: 'Provides safe short-term accommodation, bedding, and basic support for residents displaced by the storm.', image: 'assets/images/temporary_shelter_fund_v2.png' },
+  { id: 'essentials', name: 'Essential Recovery Fund', type: 'group', description: 'Provides food, hygiene supplies, transport, and essential household items during recovery.', image: 'assets/images/essential_recovery_fund_v2.png' },
 ];
 const INDIVIDUALS = [
-  { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/john_smith.png' },
-  { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/julia_hart.png' },
+  { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/morgan_patel_v2.png' },
+  { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/rowan_clarke_v2.png' },
 ];
 const INDIVIDUAL_REQUESTS = [
   {
