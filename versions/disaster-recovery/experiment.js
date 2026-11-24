@@ -31,8 +31,8 @@ const GROUPS = [
   { id: 'essentials', name: 'Essential Recovery Service', type: 'group', description: 'Provides food, hygiene supplies, transport, and essential household items during recovery.', image: 'assets/images/essential_recovery_fund_v2.png' },
 ];
 const INDIVIDUALS = [
-  { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/morgan_patel_v2.png' },
-  { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/rowan_clarke_v2.png' },
+  { id: 'morgan', name: 'Morgan Patel', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/morgan_patel_v2.png', positiveFeedbackImage: 'assets/images/morgan_patel_positive_feedback.png', negativeFeedbackImage: 'assets/images/morgan_patel_negative_feedback.png' },
+  { id: 'rowan', name: 'Rowan Clarke', type: 'individual', description: 'Seeking disaster recovery support.', image: 'assets/images/rowan_clarke_v2.png', positiveFeedbackImage: 'assets/images/rowan_clarke_positive_feedback.png', negativeFeedbackImage: 'assets/images/rowan_clarke_negative_feedback.png' },
 ];
 const INDIVIDUAL_REQUESTS = [
   {
@@ -463,13 +463,13 @@ function feedbackFor(trial, choice, hidden) {
   };
 }
 
-function targetCard(trial, showAllocationRequest = false) {
+function targetCard(trial, showAllocationRequest = false, imagePath = trial.image) {
   const theme = trial.type === 'group' ? 'teal' : 'amber';
   const description = showAllocationRequest && trial.request ? trial.request.allocationText : trial.description;
   if (trial.type === 'individual' && showAllocationRequest && trial.request) {
-    return `<div class="resident-target-stack"><aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3></aside><section class="resident-request" aria-label="Current request"><span class="resident-request-label">Current request</span><p>${escapeHtml(description)}</p></section></div>`;
+    return `<div class="resident-target-stack"><aside class="target-card ${theme}"><img class="target-image" src="${imagePath}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3></aside><section class="resident-request" aria-label="Current request"><span class="resident-request-label">Current request</span><p>${escapeHtml(description)}</p></section></div>`;
   }
-  return `<aside class="target-card ${theme}"><img class="target-image" src="${trial.image}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3><p>${escapeHtml(description)}</p></aside>`;
+  return `<aside class="target-card ${theme}"><img class="target-image" src="${imagePath}" alt="${escapeHtml(trial.name)}"><h3>${escapeHtml(trial.name)}</h3><p>${escapeHtml(description)}</p></aside>`;
 }
 
 async function chooseAllocation(trial) {
@@ -597,7 +597,8 @@ async function showFeedback(trial, feedback) {
     : '';
   const feedbackHeading = isGroup ? `<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2>` : '';
   const recordingSource = `<div class="decision-recorded-source ${isGroup ? 'public' : 'private'}"><span class="decision-recorded-token">${isGroup ? 'PUBLIC DECISION' : 'PRIVATE DECISION'}</span></div>`;
-  renderTask(`<div class="feedback-layout ${isGroup ? 'service-feedback' : 'resident-feedback'}"><div class="feedback-details">${feedbackHeading}${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div></div><div class="feedback-target">${targetCard(trial, !isGroup)}</div></div>`);
+  const feedbackImage = isGroup ? trial.image : (feedback.approved ? trial.positiveFeedbackImage : trial.negativeFeedbackImage);
+  renderTask(`<div class="feedback-layout ${isGroup ? 'service-feedback' : 'resident-feedback'}"><div class="feedback-details">${feedbackHeading}${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div></div><div class="feedback-target">${targetCard(trial, !isGroup, feedbackImage)}</div></div>`);
   await animateDecisionRecorded(isGroup);
   await waitForButton('#continue');
 }
