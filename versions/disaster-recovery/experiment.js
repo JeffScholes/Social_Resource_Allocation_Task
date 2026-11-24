@@ -13,7 +13,8 @@ const EXPERIMENT_NAME = 'Storm_Recovery_Resource_Allocation_Task';
 const VERSION = '0.1.0';
 const N_TRIALS = 10;
 const STARTING_BALANCE = 1000;
-const REPAIR_AMOUNT = 300;
+const SERVICE_REPAIR_AMOUNT = 300;
+const INDIVIDUAL_REPAIR_AMOUNT = 30;
 const GROUP_ALLOCATION_BUDGET = 1000;
 const GROUP_ALLOCATION_STEP = 100;
 const INDIVIDUAL_ALLOCATION_BUDGET = 100;
@@ -630,13 +631,14 @@ async function emotionProbe() {
 }
 
 async function chooseRepair(trial) {
+  const repairAmount = trial.type === 'individual' ? INDIVIDUAL_REPAIR_AMOUNT : SERVICE_REPAIR_AMOUNT;
   const targetRepairLabel = trial.type === 'individual'
-    ? `Add £${REPAIR_AMOUNT} to ${escapeHtml(trial.name)}’s recovery support`
-    : `Add £${REPAIR_AMOUNT} to the ${escapeHtml(trial.name)}`;
-  renderTask(`<h2>Would you like to revise the support?</h2><p>This uses £${REPAIR_AMOUNT} from your own salary.</p><div class="vertical-choices"><button class="primary repair" data-value="target">${targetRepairLabel}</button><button class="primary repair" data-value="community">Contribute £${REPAIR_AMOUNT} to wider recovery support</button><button class="primary repair" data-value="none">Make no change</button></div>`);
+    ? `Add £${repairAmount} to ${escapeHtml(trial.name)}’s recovery support`
+    : `Add £${repairAmount} to the ${escapeHtml(trial.name)}`;
+  renderTask(`<h2>Would you like to revise the support?</h2><p>This uses £${repairAmount} from your own salary.</p><div class="vertical-choices"><button class="primary repair" data-value="target">${targetRepairLabel}</button><button class="primary repair" data-value="community">Contribute £${repairAmount} to wider recovery support</button><button class="primary repair" data-value="none">Make no change</button></div>`);
   const onset = nowSeconds();
   const repairChoice = await waitForSelection('.repair');
-  return { repairChoice, responseTime: nowSeconds() - onset };
+  return { repairChoice, repairAmount, responseTime: nowSeconds() - onset };
 }
 
 async function runTrials() {
@@ -679,11 +681,11 @@ async function runTrials() {
     taskStatus.accountabilityUpdate = '';
     let emotion = null;
     if (probeTrials.has(trial.trial_num)) emotion = await emotionProbe();
-    let repair = { repairChoice: '', responseTime: '' };
+    let repair = { repairChoice: '', repairAmount: '', responseTime: '' };
     if (!feedback.approved) {
       repair = await chooseRepair(trial);
       if (repair.repairChoice !== 'none') {
-        balance -= REPAIR_AMOUNT;
+        balance -= repair.repairAmount;
         taskStatus.personalFund = balance;
       }
     }
@@ -731,6 +733,7 @@ async function runTrials() {
       approval_probability: feedback.approval_probability,
       approval_threshold: feedback.threshold,
       repair_choice: repair.repairChoice,
+      repair_amount: repair.repairAmount,
       emotion_probe_presented: emotion ? 1 : 0,
       shame_rating: emotion ? emotion.shameRating : '',
       guilt_rating: emotion ? emotion.guiltRating : '',
