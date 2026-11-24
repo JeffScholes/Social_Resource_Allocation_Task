@@ -39,71 +39,71 @@ const INDIVIDUAL_REQUESTS = [
     id: 'identity_documents',
     allocationText: 'Seeking funds to replace identification documents lost during the storm.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards replacing essential identification.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards replacing essential identification.',
-    negativeConsequence: '{name} was unable to replace the identification needed for recovery paperwork.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not complete recovery paperwork requiring ID.',
   },
   {
     id: 'insurance_paperwork',
     allocationText: 'Seeking funds for copies, printing, and postage needed for an insurance claim.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards progressing their insurance claim.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards progressing their insurance claim.',
-    negativeConsequence: '{name} was unable to complete the paperwork needed to progress their insurance claim.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name}’s insurance claim remained delayed.',
   },
   {
     id: 'bank_card_replacement',
     allocationText: 'Seeking funds to replace a bank card and restore access to their account.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards restoring access to their account.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards restoring access to their account.',
-    negativeConsequence: '{name} was unable to replace their bank card and restore access to their account.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not access money in their account.',
   },
   {
     id: 'phone_repair',
     allocationText: 'Seeking funds to repair a storm-damaged phone.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards restoring essential phone access.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards restoring essential phone access.',
-    negativeConsequence: '{name} was unable to repair their phone and remain reachable during recovery.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not stay reachable during recovery.',
   },
   {
     id: 'mobile_data',
     allocationText: 'Seeking funds for mobile data needed to manage recovery arrangements online.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards managing recovery arrangements online.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards managing recovery arrangements online.',
-    negativeConsequence: '{name} was unable to access the online information needed to manage recovery arrangements.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not access essential recovery information online.',
   },
   {
     id: 'device_charging',
     allocationText: 'Seeking funds for a replacement charger and power bank.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards keeping essential devices working.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards keeping essential devices working.',
-    negativeConsequence: '{name} was unable to keep their phone charged while recovery arrangements continued.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not keep their phone charged.',
   },
   {
     id: 'work_uniform',
     allocationText: 'Seeking funds to replace a work uniform damaged during the storm.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards returning to work.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards returning to work.',
-    negativeConsequence: '{name} was unable to replace their work uniform and return to work as planned.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not return to work as planned.',
   },
   {
     id: 'work_tools',
     allocationText: 'Seeking funds to replace basic tools or equipment needed for work.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards resuming paid work.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards resuming paid work.',
-    negativeConsequence: '{name} was unable to replace the equipment needed to resume paid work.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not resume paid work.',
   },
   {
     id: 'job_applications',
     allocationText: 'Seeking funds for printing, internet access, and application fees while looking for work.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards seeking work after the storm.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards seeking work after the storm.',
-    negativeConsequence: '{name} was unable to complete the applications needed to seek work after the storm.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not submit the applications they needed.',
   },
   {
     id: 'pet_care',
     allocationText: 'Seeking funds for food and basic care for a pet affected by the storm.',
     positiveFeedback: '{name} judged that your allocation provided fair support towards caring for their pet.',
-    negativeFeedback: '{name} judged that your allocation did not provide fair support towards caring for their pet.',
-    negativeConsequence: '{name} was unable to buy the food and basic supplies needed to care for their pet.',
+    negativeFeedback: '{name} evaluated this as unfair.',
+    negativeConsequence: '{name} could not buy the food their pet needed.',
   },
 ];
 const INTRO_DIAGRAMS = {
@@ -238,6 +238,7 @@ function taskHeaderHtml() {
     accountabilityUpdate,
   } = taskStatus;
   const recordUpdateClass = accountabilityUpdate ? `record-${accountabilityUpdate}` : '';
+  const salaryStatusClass = salaryStatus === 'Below expected' ? 'payment-status-below' : '';
   const recordDisplay = currentTrialType === 'individual'
     ? '<p class="record-private">N/A — private individual trial</p>'
     : (publicDecisionsReviewed === 0
@@ -245,7 +246,7 @@ function taskHeaderHtml() {
       : `<div class="record-meter" role="progressbar" aria-label="Recovery accountability record: ${approvedPublicDecisions} approved public service decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`);
   return `<header class="task-header">
     <div class="task-status-stack">
-      <section class="task-status-card payment-summary"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong><span class="payment-status-label">Payment status</span><strong class="payment-status-value">${escapeHtml(salaryStatus)}</strong></section>
+      <section class="task-status-card payment-summary"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong><span class="payment-status-label">Payment status</span><strong class="payment-status-value ${salaryStatusClass}">${escapeHtml(salaryStatus)}</strong></section>
       <section class="task-status-card community-record ${recordUpdateClass}"><span class="task-status-label">Accountability record</span>${recordDisplay}</section>
     </div>
     ${recoveryProgressHtml()}
