@@ -199,6 +199,7 @@ function recoveryProgressHtml() {
   const { completedTrials, totalTrials, recoveryStage } = taskStatus;
   const markerPosition = 12.5 + ((recoveryStage - 1) * 25);
   return `<section class="recovery-progress" aria-label="Recovery programme progress">
+    <span class="recovery-progress-title">Town rebuild progress</span>
     <div class="town-map" role="img" aria-label="Stylised town recovery map, stage ${recoveryStage} of 4.">
       <img src="assets/images/recovery-stage-${recoveryStage}.png" alt="">
     </div>
@@ -242,15 +243,23 @@ function taskHeaderHtml() {
       ? '<p class="record-empty">No public service decisions reviewed yet</p>'
       : `<div class="record-meter" role="progressbar" aria-label="Recovery accountability record: ${approvedPublicDecisions} approved public service decisions out of ${totalPublicDecisions}" aria-valuemin="0" aria-valuemax="${totalPublicDecisions}" aria-valuenow="${approvedPublicDecisions}"><span class="record-marker" style="left: ${5 + ((approvedPublicDecisions / totalPublicDecisions) * 90)}%"></span></div>`);
   return `<header class="task-header">
-    <section class="task-status-card payment-summary"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong><span class="payment-status-label">Payment status</span><strong class="payment-status-value">${escapeHtml(salaryStatus)}</strong></section>
-    <section class="task-status-card community-record ${recordUpdateClass}"><span class="task-status-label">Accountability record</span>${recordDisplay}</section>
+    <div class="task-status-stack">
+      <section class="task-status-card payment-summary"><span class="task-status-label">Personal payment</span><strong>£${personalFund.toFixed(2)}</strong><span class="payment-status-label">Payment status</span><strong class="payment-status-value">${escapeHtml(salaryStatus)}</strong></section>
+      <section class="task-status-card community-record ${recordUpdateClass}"><span class="task-status-label">Accountability record</span>${recordDisplay}</section>
+    </div>
     ${recoveryProgressHtml()}
   </header>`;
 }
 
-function renderTask(content, extraClass = '') {
+function trialContextBadgeHtml() {
+  if (!taskStatus?.currentTrialType) return '';
+  const isGroup = taskStatus.currentTrialType === 'group';
+  return `<p class="trial-context-badge ${isGroup ? 'public' : 'private'}"><span class="trial-context-icon" aria-hidden="true">${isGroup ? '●' : '◆'}</span>${isGroup ? 'Public service decision' : 'Private resident decision'}</p>`;
+}
+
+function renderTask(content, extraClass = '', showTrialContext = true) {
   app.dataset.recoveryStage = String(taskStatus.recoveryStage);
-  render(`${taskHeaderHtml()}${content}`, `task-panel ${extraClass}`.trim());
+  render(`${taskHeaderHtml()}${showTrialContext ? trialContextBadgeHtml() : ''}${content}`, `task-panel ${extraClass}`.trim());
 }
 
 function stopNarration() {
@@ -504,7 +513,7 @@ async function choosePrediction(trial) {
     : 'Was the individual treated fairly?';
   const approveLabel = isGroup ? 'MEETS STANDARD' : 'FAIRLY TREATED';
   const disapproveLabel = isGroup ? 'DOES NOT MEET STANDARD' : 'NOT FAIRLY TREATED';
-  renderTask(`<h2>${heading}</h2><p class="evaluation-basis">${evaluationBasis}</p><div class="prediction-target">${targetCard(trial, true)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">${approveLabel}</button><button class="primary prediction" data-value="disapprove">${disapproveLabel}</button></div>`);
+  renderTask(`<div class="prediction-layout"><div class="prediction-copy"><h2>${heading}</h2><p class="evaluation-basis">${evaluationBasis}</p></div><div class="prediction-decision"><div class="prediction-target">${targetCard(trial, true)}</div><div class="decision-row"><button class="primary prediction" data-value="approve">${approveLabel}</button><button class="primary prediction" data-value="disapprove">${disapproveLabel}</button></div></div></div>`);
   const onset = nowSeconds();
   const prediction = await waitForSelection('.prediction');
   return { prediction, responseTime: nowSeconds() - onset };
@@ -531,7 +540,7 @@ async function animateDecisionRecorded(isGroup) {
   const status = document.querySelector('.decision-recording-status');
   const label = isGroup ? 'Public decision recorded' : 'Private decision recorded';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const duration = reducedMotion ? 250 : 900;
+  const duration = reducedMotion ? 250 : 1800;
 
   if (!source || !token || !destination) {
     if (continueButton) continueButton.disabled = false;
@@ -563,7 +572,7 @@ async function animateDecisionRecorded(isGroup) {
   destination.insertAdjacentHTML('beforeend', `<span class="decision-recorded-result">${label}</span>`);
   if (!isGroup) {
     destination.classList.add('decision-destination-private');
-    window.setTimeout(() => destination.classList.remove('decision-destination-private'), 900);
+    window.setTimeout(() => destination.classList.remove('decision-destination-private'), 1800);
   }
   if (status) status.textContent = '';
   if (continueButton) continueButton.disabled = false;
@@ -583,7 +592,7 @@ async function showFeedback(trial, feedback) {
     : '';
   const feedbackHeading = isGroup ? `<h2 class="feedback ${feedback.approved ? 'good' : 'bad'}">${message}</h2>` : '';
   const recordingSource = `<div class="decision-recorded-source ${isGroup ? 'public' : 'private'}"><span class="decision-recorded-token">${isGroup ? 'PUBLIC DECISION' : 'PRIVATE DECISION'}</span></div>`;
-  renderTask(`${feedbackHeading}<div class="profiles">${targetCard(trial, !isGroup)}</div>${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div>`);
+  renderTask(`<div class="feedback-layout"><div class="feedback-target">${targetCard(trial, !isGroup)}</div><div class="feedback-details">${feedbackHeading}${requestFeedback}${recordingSource}${visibility}${recordUpdate}<p class="decision-recording-status" role="status">Recording decision…</p><div class="actions"><button id="continue" class="primary" disabled>Continue</button></div></div></div>`);
   await animateDecisionRecorded(isGroup);
   await waitForButton('#continue');
 }
@@ -602,7 +611,7 @@ async function emotionProbe() {
   renderTask(`<h2>Right now, to what extent do you feel each of the following emotions?</h2>
     <div class="question emotion-slider"><label for="shame-rating">Shame</label><input id="shame-rating" type="range" min="0" max="100" value="50" aria-describedby="shame-anchors"><div id="shame-anchors" class="slider-labels muted"><span>Not at all</span><span>Extremely</span></div></div>
     <div class="question emotion-slider"><label for="guilt-rating">Guilt</label><input id="guilt-rating" type="range" min="0" max="100" value="50" aria-describedby="guilt-anchors"><div id="guilt-anchors" class="slider-labels muted"><span>Not at all</span><span>Extremely</span></div></div>
-    <div class="actions"><button id="continue" class="primary" disabled>Continue</button></div>`);
+    <div class="actions"><button id="continue" class="primary" disabled>Continue</button></div>`, 'emotion-probe', false);
   const onset = nowSeconds();
   const touched = { shame: false, guilt: false };
   ['shame', 'guilt'].forEach((emotion) => {
@@ -624,7 +633,7 @@ async function chooseRepair(trial) {
   const targetRepairLabel = trial.type === 'individual'
     ? `Add £${REPAIR_AMOUNT} to ${escapeHtml(trial.name)}’s recovery support`
     : `Add £${REPAIR_AMOUNT} to the ${escapeHtml(trial.name)}`;
-  renderTask(`<h2>Would you like to revise the support?</h2><p>An added £${REPAIR_AMOUNT} contribution reduces your personal payment by £${REPAIR_AMOUNT}.</p><div class="vertical-choices"><button class="primary repair" data-value="target">${targetRepairLabel}</button><button class="primary repair" data-value="community">Contribute £${REPAIR_AMOUNT} to wider recovery support</button><button class="primary repair" data-value="none">Make no change</button></div>`);
+  renderTask(`<h2>Would you like to revise the support?</h2><p>This uses £${REPAIR_AMOUNT} from your own salary.</p><div class="vertical-choices"><button class="primary repair" data-value="target">${targetRepairLabel}</button><button class="primary repair" data-value="community">Contribute £${REPAIR_AMOUNT} to wider recovery support</button><button class="primary repair" data-value="none">Make no change</button></div>`);
   const onset = nowSeconds();
   const repairChoice = await waitForSelection('.repair');
   return { repairChoice, responseTime: nowSeconds() - onset };
