@@ -133,7 +133,7 @@ const INTRO_DIAGRAMS = {
     <div class="bonus-inputs"><div class="diagram-card diagram-salary">PERSONAL PAYMENT</div><div class="diagram-plus">+</div><div class="diagram-card diagram-record">ACCOUNTABILITY RECORD</div></div><div class="diagram-arrow">↓</div><div class="diagram-card diagram-payment">POTENTIAL FINAL PAYMENT</div>
   </div>`,
   progress: `<div class="instruction-diagram dashboard-diagram" role="img" aria-label="Task header showing your personal payment and payment status together, accountability record, and a visual recovery programme progress map.">
-    <div class="dashboard-preview"><div class="dashboard-status-stack"><div class="dashboard-card dashboard-payment"><span>Personal payment</span><strong>£3,400</strong><small>Payment status</small><b>On track</b></div><div class="dashboard-card dashboard-record"><span>Accountability record</span><div class="mini-record"><span></span></div></div></div><div class="dashboard-card dashboard-programme"><span class="dashboard-programme-title">Town rebuild progress</span><img src="assets/images/recovery-stage-1.png" alt=""><div class="mini-record"><span></span></div></div></div><p class="diagram-note dashboard-note">These indicators will remain visible throughout the task.</p>
+    <div class="dashboard-preview"><div class="dashboard-status-stack"><div class="dashboard-card dashboard-payment"><span>Personal payment</span><strong>£3,400</strong><small>Payment status</small><b>On track</b></div><div class="dashboard-card dashboard-record"><span>Accountability record</span><div class="mini-record"><span></span></div></div></div><div class="dashboard-card dashboard-programme"><span class="dashboard-programme-title">Town rebuild progress</span><img src="assets/images/recovery-stage-1.png" alt=""><div class="mini-rebuild-progress"><span></span></div></div></div><p class="diagram-note dashboard-note">These indicators will remain visible throughout the task.</p>
   </div>`,
   ready: `<div class="instruction-diagram ready-diagram" role="img" aria-label="You are ready to allocate funds, predict a response, and see feedback."><div class="flow-step">Allocate funds</div><b>→</b><div class="flow-step">Predict</div><b>→</b><div class="flow-step">See feedback</div></div>`,
 };
@@ -204,7 +204,7 @@ function recoveryProgressHtml() {
     <div class="town-map" role="img" aria-label="Stylised town recovery map, stage ${recoveryStage} of 4.">
       <img src="assets/images/recovery-stage-${recoveryStage}.png" alt="">
     </div>
-    <div class="recovery-horizon" role="progressbar" aria-label="Recovery programme progress: ${completedTrials} of ${totalTrials} rounds completed" aria-valuemin="0" aria-valuemax="${totalTrials}" aria-valuenow="${completedTrials}"><span class="recovery-marker" style="left: ${markerPosition}%"></span></div>
+    <div class="recovery-horizon" role="progressbar" aria-label="Recovery programme progress: ${completedTrials} of ${totalTrials} rounds completed" aria-valuemin="0" aria-valuemax="${totalTrials}" aria-valuenow="${completedTrials}"><span class="recovery-fill" style="width: ${markerPosition}%"></span><span class="recovery-marker" style="left: ${markerPosition}%"></span></div>
   </section>`;
 }
 
