@@ -11,7 +11,7 @@ const { Scheduler } = util;
 
 const EXPERIMENT_NAME = 'Storm_Recovery_Resource_Allocation_Task';
 const VERSION = '0.1.0';
-const N_TRIALS = 10;
+const N_TRIALS = 20;
 const STARTING_BALANCE = 1000;
 const SERVICE_REPAIR_AMOUNT = 300;
 const INDIVIDUAL_REPAIR_AMOUNT = 30;
